@@ -29,10 +29,13 @@ const { sortedFolders } = Astro.props;
                         <li>
                             <a
                                 href={`#${slug}`}
-                                class="nav-link text-[10px] font-mono uppercase tracking-widest text-neutral-500 transition-colors duration-200"
+                                class="nav-link block text-[10px] font-mono uppercase tracking-widest text-neutral-500 transition-colors duration-200 relative overflow-hidden group px-2 py-1"
                                 data-target={slug}
                             >
-                                | {folder} |
+                                <span class="absolute left-0 top-0 bottom-0 w-full opacity-10 pointer-events-none z-0">
+                                    <span class="block h-full bg-[var(--color-trust)] w-0 transition-all duration-100 ease-linear nav-progress-bar" />
+                                </span>
+                                <span class="relative z-10">| {folder} |</span>
                             </a>
                         </li>
                     );
@@ -41,6 +44,31 @@ const { sortedFolders } = Astro.props;
         </ul>
     </nav>
 </header>
+
+<script>
+    // Smart Active State Progress for Mobile Header
+    document.addEventListener("section-progress", ((e: CustomEvent) => {
+        const { sectionId, progress } = e.detail;
+
+        // Update matching mobile links
+        document
+            .querySelectorAll(
+                `.nav-link[data-target="${sectionId}"] .nav-progress-bar`,
+            )
+            .forEach((el) => {
+                (el as HTMLElement).style.width =
+                    `${Math.max(0, Math.min(100, progress * 100))}%`;
+            });
+
+        // Reset others (handling global reset if Desktop sidebar doesn't cover it)
+        document.querySelectorAll(".nav-progress-bar").forEach((el) => {
+            const link = el.closest(".nav-link");
+            if (link && link.getAttribute("data-target") !== sectionId) {
+                (el as HTMLElement).style.width = "0%";
+            }
+        });
+    }) as EventListener);
+</script>
 
 <style>
     /* Ticker Nav hiding scrollbar */

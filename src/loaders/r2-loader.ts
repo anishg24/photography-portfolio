@@ -70,7 +70,7 @@ async function extractMetadata(buffer: Buffer) {
         const height = parseNum(metadata.ImageHeight) || parseNum(metadata.ExifImageHeight) || undefined;
 
         // Prefer 35mm equivalent if available, otherwise standard focal length
-        const focalLength = parseNum(metadata.FocalLengthIn35mmFormat) || parseNum(metadata.FocalLength) || undefined;
+        const focalLength = parseNum(metadata.FocalLength) || parseNum(metadata.FocalLengthIn35mmFormat) || undefined;
 
         return {
             dateTaken,

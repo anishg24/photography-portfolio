@@ -77,3 +77,34 @@ body {
 .sharp {
     border-radius: 0 !important;
 }
+
+/* Animations for Ledger HUD */
+@keyframes drawHorizontal {
+    from {
+        transform: scaleX(0);
+    }
+
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes drawVertical {
+    from {
+        transform: scaleY(0);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}
+
+.animate-draw-h {
+    animation: drawHorizontal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-draw-v {
+    animation: drawVertical 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.1s;
+    /* Slight delay for vertical */
+}
