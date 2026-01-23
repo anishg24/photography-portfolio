@@ -25,7 +25,9 @@ const { title, description = "Anish's Photography Portfolio" } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body class="bg-neutral-950 text-neutral-100 antialiased min-h-screen">
+  <body
+    class="bg-[var(--color-obsidian)] text-[var(--color-flash)] antialiased min-h-screen"
+  >
     <slot />
     <script>
       import Lenis from "lenis";

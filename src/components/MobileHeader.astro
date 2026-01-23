@@ -7,19 +7,19 @@ const { sortedFolders } = Astro.props;
 ---
 
 <header
-    class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-neutral-800"
+    class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-[var(--color-structural)]"
 >
-    <div class="p-6 pb-2">
+    <div class="p-6 pb-2 text-center">
         <h1
             class="text-2xl font-serif font-bold tracking-tight text-white uppercase"
         >
-            Anish Photos
+            Anish Photography
         </h1>
     </div>
 
     {/* Horizontal Ticker Nav */}
     <nav
-        class="overflow-x-auto no-scrollbar border-t border-neutral-900 bg-neutral-950/50 backdrop-blur-md"
+        class="overflow-x-auto no-scrollbar border-t border-[var(--color-structural)] bg-[var(--color-obsidian)]"
     >
         <ul class="flex whitespace-nowrap px-6 py-3 space-x-8">
             {

@@ -4,9 +4,10 @@ import PhotoCard from "./PhotoCard.astro";
 interface Props {
     folder: string;
     folderPhotos: any[];
+    collectionId: string;
 }
 
-const { folder, folderPhotos } = Astro.props;
+const { folder, folderPhotos, collectionId } = Astro.props;
 
 // Date range calculation
 const dates = folderPhotos.map((p) => new Date(p.data.dateTaken).getTime());
@@ -35,7 +36,7 @@ const slug = folder.toLowerCase().replace(/\s+/g, "-");
 <section id={slug} class="scroll-mt-32 lg:scroll-mt-24 section-folder">
     {/* Section Header */}
     <div
-        class="border-b border-neutral-800 pb-4 mb-12 flex justify-between items-end"
+        class="border-b border-[var(--color-structural)] pb-4 mb-12 flex justify-between items-end"
     >
         <div>
             <h2
@@ -48,7 +49,7 @@ const slug = folder.toLowerCase().replace(/\s+/g, "-");
             <p
                 class="text-xs text-[var(--color-trust)] font-mono uppercase tracking-widest mb-1"
             >
-                Collection ID: {folder.substring(0, 3).toUpperCase()}
+                Collection ID: {collectionId}
             </p>
             <p
                 class="text-xs text-neutral-500 font-mono uppercase tracking-widest"

@@ -41,6 +41,25 @@ sortedFolders.forEach((folder) => {
 			new Date(a.data.dateTaken).getTime(),
 	);
 });
+
+const generateCollectionId = (folderName: string) => {
+	// Split by space or special characters
+	const words = folderName.split(/[\s_-]+/);
+
+	if (words.length === 1) {
+		return folderName.substring(0, 3).toUpperCase();
+	}
+
+	// Initials
+	let initials = words
+		.map((w) => w[0])
+		.join("")
+		.toUpperCase();
+
+	// If only 2 letters, maybe different logic? User asked for Distinct.
+	// E.g. San Diego -> SD. San Diego Zoo -> SDZ.
+	return initials;
+};
 ---
 
 <Layout title="Anish Photography">
@@ -69,6 +88,7 @@ sortedFolders.forEach((folder) => {
 							<FolderSection
 								folder={folder}
 								folderPhotos={groupedPhotos[folder]}
+								collectionId={generateCollectionId(folder)}
 							/>
 						))}
 					</div>

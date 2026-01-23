@@ -6,13 +6,25 @@
     --font-serif: "Playfair Display", serif;
     --font-mono: "JetBrains Mono", monospace;
 
-    /* Colors - Obsidian Ledger Palette */
+    /* Colors - Obsidian Velvet Palette */
     --color-obsidian: #050505;
-    --color-matte: #0A0A0A;
-    --color-structural: #27272A;
-    --color-flash: #FFFFFF;
-    --color-steel: #A1A1AA;
-    --color-trust: #007AFF;
+    /* Deepest black for main content/photo background */
+    --color-matte: #09090B;
+    /* Rich, slightly lighter black for UI areas (Sidebar) */
+    --color-structural: #1F1F22;
+    /* Subtle separation borders */
+    --color-flash: #E4E4E7;
+    /* Primary Text (Zinc-200) - Softened from pure white */
+    --color-steel: #71717A;
+    /* Secondary Text (Zinc-500) - Muted */
+    --color-trust: #FAFAFA;
+    /* Accent (Zinc-50) - Monochrome "Highlight" instead of Blue */
+
+}
+
+::selection {
+    background-color: #3F3F46;
+    color: #FFFFFF;
 }
 
 html.lenis,
