@@ -139,6 +139,12 @@ export function r2Loader(config: R2LoaderConfig): Loader {
                 },
             });
 
+            // Get existing keys in store to handle deletions later
+            const existingKeys = new Set<string>();
+            for (const [id] of context.store.entries()) {
+                existingKeys.add(id);
+            }
+
             const command = new ListObjectsV2Command({
                 Bucket: config.bucket,
             });
@@ -149,14 +155,26 @@ export function r2Loader(config: R2LoaderConfig): Loader {
 
                 context.logger.info(`Found ${contents.length} images in R2 bucket`);
 
-                // Process images in parallel batches to avoid memory issues if too many, but for now map is fine
+                const bucketKeys = new Set<string>();
+
+                // Process images
                 const promises = contents.map(async (item) => {
                     if (!item.Key) return;
                     if (!/\.(jpg|jpeg|png|webp|avif)$/i.test(item.Key)) return;
 
                     const id = item.Key; // Use the file path/key as the ID
+                    bucketKeys.add(id);
+
                     const url = `${config.publicDomain}/${item.Key}`;
                     const lastModified = item.LastModified || new Date();
+                    const etag = item.ETag?.replace(/"/g, "");
+
+                    // Check if we already have this item and if it has changed
+                    const existing = context.store.get(id);
+                    if (existing && existing.data.etag === etag) {
+                        return; // Skip re-fetching metadata for unchanged files
+                    }
+
                     let dateTaken = lastModified;
                     let width: number | undefined;
                     let height: number | undefined;
@@ -169,6 +187,7 @@ export function r2Loader(config: R2LoaderConfig): Loader {
                     let focalLength: number | undefined;
 
                     try {
+                        context.logger.info(`Fetching metadata for ${item.Key}...`);
                         // Fetch first 64KB for header/EXIF
                         const getCommand = new GetObjectCommand({
                             Bucket: config.bucket,
@@ -176,7 +195,6 @@ export function r2Loader(config: R2LoaderConfig): Loader {
                             Range: "bytes=0-65535"
                         });
 
-                        // We need to catch this specific call
                         const objectData = await client.send(getCommand);
                         if (objectData.Body) {
                             const byteArray = await objectData.Body.transformToByteArray();
@@ -208,7 +226,7 @@ export function r2Loader(config: R2LoaderConfig): Loader {
                             dateTaken,
                             width,
                             height,
-                            etag: item.ETag?.replace(/"/g, ""),
+                            etag,
                             make,
                             model,
                             fNumber,
@@ -221,6 +239,14 @@ export function r2Loader(config: R2LoaderConfig): Loader {
                 });
 
                 await Promise.all(promises);
+
+                // Delete items that are no longer in the bucket
+                for (const key of existingKeys) {
+                    if (!bucketKeys.has(key)) {
+                        context.logger.info(`Removing deleted file from store: ${key}`);
+                        context.store.delete(key);
+                    }
+                }
 
             } catch (error) {
                 context.logger.error(`Error loading from R2: ${error instanceof Error ? error.message : String(error)}`);
