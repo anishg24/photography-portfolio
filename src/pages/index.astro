@@ -2,7 +2,10 @@
 export const prerender = true;
 import Layout from "../layouts/Layout.astro";
 import Lightbox from "../components/Lightbox.astro";
-import StaticImage from "../components/StaticImage.astro";
+import MobileHeader from "../components/MobileHeader.astro";
+import DesktopSidebar from "../components/DesktopSidebar.astro";
+import FolderSection from "../components/FolderSection.astro";
+import MobileFooter from "../components/MobileFooter.astro";
 import { getCollection } from "astro:content";
 
 // Fetch photos from R2 collection
@@ -44,111 +47,15 @@ sortedFolders.forEach((folder) => {
 	<div
 		class="flex flex-col lg:flex-row min-h-screen bg-[var(--color-obsidian)] text-[var(--color-flash)]"
 	>
-		{/* Mobile Header & Ticker Nav */}
-		<header
-			class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-neutral-800"
-		>
-			<div class="p-6 pb-2">
-				<h1
-					class="text-2xl font-serif font-bold tracking-tight text-white uppercase"
-				>
-					Anish Photos
-				</h1>
-			</div>
+		<MobileHeader sortedFolders={sortedFolders} />
 
-			{/* Horizontal Ticker Nav */}
-			<nav
-				class="overflow-x-auto no-scrollbar border-t border-neutral-900 bg-neutral-950/50 backdrop-blur-md"
-			>
-				<ul class="flex whitespace-nowrap px-6 py-3 space-x-8">
-					{
-						sortedFolders.map((folder) => {
-							const slug = folder
-								.toLowerCase()
-								.replace(/\s+/g, "-");
-							return (
-								<li>
-									<a
-										href={`#${slug}`}
-										class="nav-link text-[10px] font-mono uppercase tracking-widest text-neutral-500 transition-colors duration-200"
-										data-target={slug}
-									>
-										| {folder} |
-									</a>
-								</li>
-							);
-						})
-					}
-				</ul>
-			</nav>
-		</header>
-
-		{/* Desktop Sidebar Navigation */}
-		<nav
-			class="hidden lg:flex lg:w-72 lg:h-screen lg:sticky lg:top-0 p-8 flex-col border-r border-neutral-800 bg-[var(--color-obsidian)] z-50"
-		>
-			<h1
-				class="text-3xl font-serif font-bold tracking-tighter text-white uppercase mb-16"
-			>
-				Anish<br />Photography
-			</h1>
-
-			<div class="relative pl-0">
-				{/* Vertical Track */}
-				<div class="absolute left-0 top-0 bottom-0 w-px bg-neutral-900">
-				</div>
-
-				{/* Blue Marker Indicator (Sharp) */}
-				<div
-					id="active-pill"
-					class="absolute -left-[1px] w-[3px] bg-[var(--color-trust)] transition-all duration-300 ease-out opacity-0 z-10 hidden lg:block"
-					style="height: 0px; top: 0px;"
-				>
-				</div>
-
-				<ul class="space-y-4 relative z-0">
-					{
-						sortedFolders.map((folder) => {
-							const slug = folder
-								.toLowerCase()
-								.replace(/\s+/g, "-");
-							return (
-								<li>
-									<a
-										href={`#${slug}`}
-										class="nav-link block pl-6 text-neutral-500 hover:text-white transition-colors duration-200 text-xs font-mono uppercase tracking-widest"
-										data-target={slug}
-									>
-										{folder}
-									</a>
-								</li>
-							);
-						})
-					}
-				</ul>
-			</div>
-
-			{/* Financial Footer */}
-			<div class="mt-auto border-t border-neutral-900 pt-6">
-				<div
-					class="flex justify-between items-center text-[10px] font-mono text-neutral-600 uppercase tracking-wider"
-				>
-					<span>TOTAL HOLDINGS</span>
-					<span>{photos.length}</span>
-				</div>
-				<div
-					class="flex justify-between items-center text-[10px] font-mono text-[var(--color-trust)] uppercase tracking-wider mt-1"
-				>
-					<span>MARKET STATUS</span>
-					<span>LIVE</span>
-				</div>
-			</div>
-		</nav>
+		<DesktopSidebar
+			sortedFolders={sortedFolders}
+			totalPhotos={photos.length}
+		/>
 
 		{/* Main Content */}
 		<main class="flex-1 p-4 lg:p-12 ml-0 w-full bg-[var(--color-obsidian)]">
-			{/* Removed original mobile header */}
-
 			{
 				Object.keys(groupedPhotos).length === 0 ? (
 					<div class="text-center py-20">
@@ -158,178 +65,12 @@ sortedFolders.forEach((folder) => {
 					</div>
 				) : (
 					<div class="space-y-40 pb-32 lg:pb-0">
-						{sortedFolders.map((folder) => {
-							const folderPhotos = groupedPhotos[folder];
-							const dates = folderPhotos.map((p) =>
-								new Date(p.data.dateTaken).getTime(),
-							);
-							const minDate = new Date(Math.min(...dates));
-							const maxDate = new Date(Math.max(...dates));
-
-							const formatDate = (d: Date) =>
-								d
-									.toLocaleDateString("en-US", {
-										month: "2-digit",
-										day: "2-digit",
-										year: "numeric",
-									})
-									.replace(/\//g, ".");
-
-							const isSameDay =
-								minDate.toDateString() ===
-								maxDate.toDateString();
-
-							const dateRange =
-								isSameDay || dates.length < 2
-									? formatDate(minDate)
-									: formatDate(minDate) +
-										" -> " +
-										formatDate(maxDate);
-
-							const slug = folder
-								.toLowerCase()
-								.replace(/\s+/g, "-");
-
-							return (
-								<section
-									id={slug}
-									class="scroll-mt-32 lg:scroll-mt-24 section-folder"
-								>
-									{/* Section Header */}
-									<div class="border-b border-neutral-800 pb-4 mb-12 flex justify-between items-end">
-										<div>
-											<h2 class="text-4xl lg:text-5xl font-serif text-white font-bold tracking-tight uppercase">
-												{folder}
-											</h2>
-										</div>
-										<div class="text-right hidden sm:block">
-											<p class="text-xs text-[var(--color-trust)] font-mono uppercase tracking-widest mb-1">
-												Collection ID:{" "}
-												{folder
-													.substring(0, 3)
-													.toUpperCase()}
-											</p>
-											<p class="text-xs text-neutral-500 font-mono uppercase tracking-widest">
-												{dateRange}
-											</p>
-										</div>
-									</div>
-
-									{/* Masonry Grid */}
-									<div class="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-										{folderPhotos.map((photo) => {
-											const {
-												url,
-												key,
-												width,
-												height,
-												make,
-												model,
-												dateTaken,
-												fNumber,
-												iso,
-												exposureTime,
-												lensModel,
-												focalLength,
-											} = photo.data;
-
-											const camera =
-												make && model
-													? `${make} ${model}`
-													: model || make || "";
-											const date = new Date(
-												dateTaken,
-											).toLocaleDateString("en-US", {
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											});
-											const aperture = fNumber
-												? `f/${fNumber}`
-												: "";
-											const isoVal = iso
-												? `ISO ${iso}`
-												: "";
-											const shutter = exposureTime
-												? exposureTime < 1
-													? `1/${Math.round(1 / exposureTime)}`
-													: `${exposureTime}s`
-												: "";
-											const lens = lensModel || "";
-											const focalLen = focalLength
-												? `${Math.round(focalLength)}mm`
-												: "";
-											const fileName =
-												key.split("/").pop() || key;
-
-											return (
-												<div class="break-inside-avoid mb-8">
-													<a
-														href={url}
-														data-pswp-width={
-															width || 2500
-														}
-														data-pswp-height={
-															height || 1667
-														}
-														target="_blank"
-														data-pswp-name={
-															fileName
-														}
-														data-pswp-camera={
-															camera
-														}
-														data-pswp-date={date}
-														data-pswp-aperture={
-															aperture
-														}
-														data-pswp-iso={isoVal}
-														data-pswp-shutter={
-															shutter
-														}
-														data-pswp-lens={lens}
-														data-pswp-focal-length={
-															focalLen
-														}
-														class="block group bg-neutral-900 border border-neutral-800 hover:border-neutral-600 transition-colors duration-300 sharp"
-													>
-														{/* Image Container */}
-														<div class="overflow-hidden relative">
-															<StaticImage
-																src={url}
-																alt={key}
-																class="w-full h-auto block"
-																imgClass="object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale-0 contrast-110"
-																loading="lazy"
-																width={width}
-																height={height}
-															/>
-														</div>
-
-														{/* Metadata Footer */}
-														<div class="p-3 bg-neutral-950 border-t border-neutral-800 flex justify-between items-center">
-															<span class="text-[10px] text-neutral-400 font-mono uppercase tracking-widest truncate max-w-[60%]">
-																{fileName}
-															</span>
-															<div class="flex gap-4 items-center">
-																<span class="text-[10px] text-[var(--color-trust)] font-mono uppercase tracking-widest">
-																	{iso
-																		? `ISO ${iso}`
-																		: "RAW"}
-																</span>
-																<span class="text-[10px] text-neutral-600 font-mono uppercase tracking-widest hidden sm:inline">
-																	{shutter}
-																</span>
-															</div>
-														</div>
-													</a>
-												</div>
-											);
-										})}
-									</div>
-								</section>
-							);
-						})}
+						{sortedFolders.map((folder) => (
+							<FolderSection
+								folder={folder}
+								folderPhotos={groupedPhotos[folder]}
+							/>
+						))}
 					</div>
 				)
 			}
@@ -337,30 +78,7 @@ sortedFolders.forEach((folder) => {
 			<Lightbox />
 		</main>
 
-		{/* Mobile Fixed Status Bar */}
-		<footer
-			class="lg:hidden fixed bottom-0 left-0 right-0 h-10 bg-neutral-950 border-t border-neutral-900 z-50 flex items-center justify-between px-6"
-		>
-			<div class="flex items-center gap-2">
-				<div class="w-1.5 h-1.5 bg-[var(--color-trust)] animate-pulse">
-				</div>
-				<span
-					class="text-[9px] font-mono text-neutral-400 uppercase tracking-tighter"
-					>TOTAL HOLDINGS: {photos.length} ASSETS</span
-				>
-			</div>
-			<div
-				class="text-[9px] font-mono text-neutral-600 uppercase tracking-tighter"
-			>
-				LAST_UPDATE: {
-					new Date().toLocaleTimeString("en-US", {
-						hour: "2-digit",
-						minute: "2-digit",
-						hour12: false,
-					})
-				}
-			</div>
-		</footer>
+		<MobileFooter totalPhotos={photos.length} />
 	</div>
 
 	<script>
@@ -420,15 +138,4 @@ sortedFolders.forEach((folder) => {
 			observer.observe(section);
 		});
 	</script>
-
-	<style>
-		/* Ticker Nav hiding scrollbar */
-		.no-scrollbar::-webkit-scrollbar {
-			display: none;
-		}
-		.no-scrollbar {
-			-ms-overflow-style: none;
-			scrollbar-width: none;
-		}
-	</style>
 </Layout>

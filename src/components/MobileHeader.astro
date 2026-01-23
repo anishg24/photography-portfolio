@@ -1,0 +1,54 @@
+---
+interface Props {
+    sortedFolders: string[];
+}
+
+const { sortedFolders } = Astro.props;
+---
+
+<header
+    class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-neutral-800"
+>
+    <div class="p-6 pb-2">
+        <h1
+            class="text-2xl font-serif font-bold tracking-tight text-white uppercase"
+        >
+            Anish Photos
+        </h1>
+    </div>
+
+    {/* Horizontal Ticker Nav */}
+    <nav
+        class="overflow-x-auto no-scrollbar border-t border-neutral-900 bg-neutral-950/50 backdrop-blur-md"
+    >
+        <ul class="flex whitespace-nowrap px-6 py-3 space-x-8">
+            {
+                sortedFolders.map((folder) => {
+                    const slug = folder.toLowerCase().replace(/\s+/g, "-");
+                    return (
+                        <li>
+                            <a
+                                href={`#${slug}`}
+                                class="nav-link text-[10px] font-mono uppercase tracking-widest text-neutral-500 transition-colors duration-200"
+                                data-target={slug}
+                            >
+                                | {folder} |
+                            </a>
+                        </li>
+                    );
+                })
+            }
+        </ul>
+    </nav>
+</header>
+
+<style>
+    /* Ticker Nav hiding scrollbar */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>

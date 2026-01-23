@@ -1,0 +1,94 @@
+---
+import StaticImage from "./StaticImage.astro";
+
+interface Props {
+    photo: any;
+}
+
+const { photo } = Astro.props;
+const {
+    url,
+    key,
+    width,
+    height,
+    make,
+    model,
+    dateTaken,
+    fNumber,
+    iso,
+    exposureTime,
+    lensModel,
+    focalLength,
+} = photo.data;
+
+const camera = make && model ? `${make} ${model}` : model || make || "";
+const date = new Date(dateTaken).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+});
+const aperture = fNumber ? `f/${fNumber}` : "";
+const isoVal = iso ? `ISO ${iso}` : "";
+const shutter = exposureTime
+    ? exposureTime < 1
+        ? `1/${Math.round(1 / exposureTime)}`
+        : `${exposureTime}s`
+    : "";
+const lens = lensModel || "";
+const focalLen = focalLength ? `${Math.round(focalLength)}mm` : "";
+const fileName = key.split("/").pop() || key;
+---
+
+<div class="break-inside-avoid mb-8">
+    <a
+        href={url}
+        data-pswp-width={width || 2500}
+        data-pswp-height={height || 1667}
+        target="_blank"
+        data-pswp-name={fileName}
+        data-pswp-camera={camera}
+        data-pswp-date={date}
+        data-pswp-aperture={aperture}
+        data-pswp-iso={isoVal}
+        data-pswp-shutter={shutter}
+        data-pswp-lens={lens}
+        data-pswp-focal-length={focalLen}
+        class="block group bg-neutral-900 border border-neutral-800 hover:border-neutral-600 transition-colors duration-300 sharp"
+    >
+        {/* Image Container */}
+        <div class="overflow-hidden relative">
+            <StaticImage
+                src={url}
+                alt={key}
+                class="w-full h-auto block"
+                imgClass="object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale-0 contrast-110"
+                loading="lazy"
+                width={width}
+                height={height}
+            />
+        </div>
+
+        {/* Metadata Footer */}
+        <div
+            class="p-3 bg-neutral-950 border-t border-neutral-800 flex justify-between items-center"
+        >
+            <span
+                class="text-[10px] text-neutral-400 font-mono uppercase tracking-widest truncate max-w-[60%]"
+            >
+                {fileName}
+            </span>
+            <div class="flex gap-4 items-center">
+                <span
+                    class="text-[10px] text-[var(--color-trust)] font-mono uppercase tracking-widest"
+                >
+                    {iso ? `ISO ${iso}` : "RAW"}
+                </span>
+                <span
+                    class="text-[10px] text-neutral-600 font-mono uppercase tracking-widest hidden sm:inline"
+                >
+                    {shutter}
+                </span>
+            </div>
+        </div>
+    </a>
+</div>
