@@ -40,18 +40,57 @@ sortedFolders.forEach((folder) => {
 });
 ---
 
-<Layout title="Anish's Photography Portfolio">
+<Layout title="Anish Photography">
 	<div
 		class="flex flex-col lg:flex-row min-h-screen bg-[var(--color-obsidian)] text-[var(--color-flash)]"
 	>
-		{/* Sidebar Navigation */}
+		{/* Mobile Header & Ticker Nav */}
+		<header
+			class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-neutral-800"
+		>
+			<div class="p-6 pb-2">
+				<h1
+					class="text-2xl font-serif font-bold tracking-tight text-white uppercase"
+				>
+					Anish Photos
+				</h1>
+			</div>
+
+			{/* Horizontal Ticker Nav */}
+			<nav
+				class="overflow-x-auto no-scrollbar border-t border-neutral-900 bg-neutral-950/50 backdrop-blur-md"
+			>
+				<ul class="flex whitespace-nowrap px-6 py-3 space-x-8">
+					{
+						sortedFolders.map((folder) => {
+							const slug = folder
+								.toLowerCase()
+								.replace(/\s+/g, "-");
+							return (
+								<li>
+									<a
+										href={`#${slug}`}
+										class="nav-link text-[10px] font-mono uppercase tracking-widest text-neutral-500 transition-colors duration-200"
+										data-target={slug}
+									>
+										| {folder} |
+									</a>
+								</li>
+							);
+						})
+					}
+				</ul>
+			</nav>
+		</header>
+
+		{/* Desktop Sidebar Navigation */}
 		<nav
-			class="lg:w-72 lg:h-screen lg:sticky lg:top-0 p-8 flex flex-col border-r border-neutral-800 bg-[var(--color-obsidian)] z-50"
+			class="hidden lg:flex lg:w-72 lg:h-screen lg:sticky lg:top-0 p-8 flex-col border-r border-neutral-800 bg-[var(--color-obsidian)] z-50"
 		>
 			<h1
-				class="text-3xl font-serif font-bold tracking-tighter text-white uppercase mb-16 hidden lg:block"
+				class="text-3xl font-serif font-bold tracking-tighter text-white uppercase mb-16"
 			>
-				Anish's<br />Portfolio
+				Anish<br />Photography
 			</h1>
 
 			<div class="relative pl-0">
@@ -62,32 +101,35 @@ sortedFolders.forEach((folder) => {
 				{/* Blue Marker Indicator (Sharp) */}
 				<div
 					id="active-pill"
-					class="absolute -left-[1px] w-[3px] bg-[var(--color-trust)] transition-all duration-300 ease-out opacity-0 z-10"
+					class="absolute -left-[1px] w-[3px] bg-[var(--color-trust)] transition-all duration-300 ease-out opacity-0 z-10 hidden lg:block"
 					style="height: 0px; top: 0px;"
 				>
 				</div>
 
 				<ul class="space-y-4 relative z-0">
 					{
-						sortedFolders.map((folder) => (
-							<li>
-								<a
-									href={`#${folder}`}
-									class="nav-link block pl-6 text-neutral-500 hover:text-white transition-colors duration-200 text-xs font-mono uppercase tracking-widest"
-									data-target={folder}
-								>
-									{folder}
-								</a>
-							</li>
-						))
+						sortedFolders.map((folder) => {
+							const slug = folder
+								.toLowerCase()
+								.replace(/\s+/g, "-");
+							return (
+								<li>
+									<a
+										href={`#${slug}`}
+										class="nav-link block pl-6 text-neutral-500 hover:text-white transition-colors duration-200 text-xs font-mono uppercase tracking-widest"
+										data-target={slug}
+									>
+										{folder}
+									</a>
+								</li>
+							);
+						})
 					}
 				</ul>
 			</div>
 
 			{/* Financial Footer */}
-			<div
-				class="mt-auto hidden lg:block border-t border-neutral-900 pt-6"
-			>
+			<div class="mt-auto border-t border-neutral-900 pt-6">
 				<div
 					class="flex justify-between items-center text-[10px] font-mono text-neutral-600 uppercase tracking-wider"
 				>
@@ -105,13 +147,7 @@ sortedFolders.forEach((folder) => {
 
 		{/* Main Content */}
 		<main class="flex-1 p-4 lg:p-12 ml-0 w-full bg-[var(--color-obsidian)]">
-			<header class="mb-16 text-center lg:hidden">
-				<h1
-					class="text-3xl font-serif font-bold tracking-tight text-white uppercase mb-4"
-				>
-					Anish's Portfolio
-				</h1>
-			</header>
+			{/* Removed original mobile header */}
 
 			{
 				Object.keys(groupedPhotos).length === 0 ? (
@@ -121,7 +157,7 @@ sortedFolders.forEach((folder) => {
 						</p>
 					</div>
 				) : (
-					<div class="space-y-40 pb-32">
+					<div class="space-y-40 pb-32 lg:pb-0">
 						{sortedFolders.map((folder) => {
 							const folderPhotos = groupedPhotos[folder];
 							const dates = folderPhotos.map((p) =>
@@ -150,10 +186,14 @@ sortedFolders.forEach((folder) => {
 										" -> " +
 										formatDate(maxDate);
 
+							const slug = folder
+								.toLowerCase()
+								.replace(/\s+/g, "-");
+
 							return (
 								<section
-									id={folder}
-									class="scroll-mt-24 section-folder"
+									id={slug}
+									class="scroll-mt-32 lg:scroll-mt-24 section-folder"
 								>
 									{/* Section Header */}
 									<div class="border-b border-neutral-800 pb-4 mb-12 flex justify-between items-end">
@@ -251,7 +291,7 @@ sortedFolders.forEach((folder) => {
 														data-pswp-focal-length={
 															focalLen
 														}
-														class="block group bg-neutral-900 border border-neutral-800 hover:border-neutral-600 transition-colors duration-300"
+														class="block group bg-neutral-900 border border-neutral-800 hover:border-neutral-600 transition-colors duration-300 sharp"
 													>
 														{/* Image Container */}
 														<div class="overflow-hidden relative">
@@ -271,11 +311,16 @@ sortedFolders.forEach((folder) => {
 															<span class="text-[10px] text-neutral-400 font-mono uppercase tracking-widest truncate max-w-[60%]">
 																{fileName}
 															</span>
-															<span class="text-[10px] text-[var(--color-trust)] font-mono uppercase tracking-widest">
-																{iso
-																	? `ISO ${iso}`
-																	: "RAW"}
-															</span>
+															<div class="flex gap-4 items-center">
+																<span class="text-[10px] text-[var(--color-trust)] font-mono uppercase tracking-widest">
+																	{iso
+																		? `ISO ${iso}`
+																		: "RAW"}
+																</span>
+																<span class="text-[10px] text-neutral-600 font-mono uppercase tracking-widest hidden sm:inline">
+																	{shutter}
+																</span>
+															</div>
 														</div>
 													</a>
 												</div>
@@ -291,6 +336,25 @@ sortedFolders.forEach((folder) => {
 
 			<Lightbox />
 		</main>
+
+		{/* Mobile Fixed Status Bar */}
+		<footer
+			class="lg:hidden fixed bottom-0 left-0 right-0 h-10 bg-neutral-950 border-t border-neutral-900 z-50 flex items-center justify-between px-6"
+		>
+			<div class="flex items-center gap-2">
+				<div class="w-1.5 h-1.5 bg-[var(--color-trust)] animate-pulse">
+				</div>
+				<span
+					class="text-[9px] font-mono text-neutral-400 uppercase tracking-tighter"
+					>PORTFOLIO VALUE: +2.5%</span
+				>
+			</div>
+			<div
+				class="text-[9px] font-mono text-neutral-600 uppercase tracking-tighter"
+			>
+				LAST_UPDATE: {new Date().getHours()}:{new Date().getMinutes()}
+			</div>
+		</footer>
 	</div>
 
 	<script>
@@ -301,49 +365,46 @@ sortedFolders.forEach((folder) => {
 
 		const observerOptions = {
 			root: null,
-			rootMargin: "-20% 0px -60% 0px", // Trigger when section is near top/middle
+			rootMargin: "-25% 0px -50% 0px", // Adjusted for mobile sticky header
 			threshold: 0,
 		};
 
 		const observer = new IntersectionObserver((entries) => {
 			entries.forEach((entry) => {
 				if (entry.isIntersecting) {
-					// Reset all links
+					const id = entry.target.id;
+
+					// Reset and activate all links pointing to this target (mobile + desktop)
 					navLinks.forEach((link) => {
-						link.classList.remove("text-white", "font-bold");
-						link.classList.add("text-neutral-500");
+						const target = link.getAttribute("data-target");
+						if (target === id) {
+							link.classList.remove("text-neutral-500");
+							link.classList.add("text-white");
+						} else {
+							link.classList.remove("text-white");
+							link.classList.add("text-neutral-500");
+						}
 					});
 
-					// Activate current link
-					const id = entry.target.id;
-					const activeLink = document.querySelector(
-						`.nav-link[data-target="${id}"]`,
+					// Handle Pillar Indicator (Desktop Only)
+					const desktopActiveLink = document.querySelector(
+						`nav.lg\\:flex .nav-link[data-target="${id}"]`,
 					) as HTMLElement;
 
-					if (activeLink && pill) {
-						// Update Link Styles
-						activeLink.classList.remove("text-neutral-500");
-						activeLink.classList.add("text-white"); // Removed font-bold to keep it clean/sharp
-
-						// Move Pill
+					if (desktopActiveLink && pill && pill.offsetParent) {
 						const container = pill.offsetParent as HTMLElement;
-						if (container) {
-							// Determine strictly vertical position
-							const linkRect = activeLink.getBoundingClientRect();
-							const containerRect =
-								container.getBoundingClientRect();
-							const relativeTop =
-								linkRect.top - containerRect.top;
-							const linkHeight = activeLink.offsetHeight;
+						const linkRect =
+							desktopActiveLink.getBoundingClientRect();
+						const containerRect = container.getBoundingClientRect();
+						const relativeTop = linkRect.top - containerRect.top;
+						const linkHeight = desktopActiveLink.offsetHeight;
 
-							// Height of the sharp marker
-							const targetHeight = 16;
-							const offset = (linkHeight - targetHeight) / 2;
+						const targetHeight = 16;
+						const offset = (linkHeight - targetHeight) / 2;
 
-							pill.style.opacity = "1";
-							pill.style.top = `${relativeTop + offset}px`;
-							pill.style.height = `${targetHeight}px`;
-						}
+						pill.style.opacity = "1";
+						pill.style.top = `${relativeTop + offset}px`;
+						pill.style.height = `${targetHeight}px`;
 					}
 				}
 			});
@@ -353,4 +414,15 @@ sortedFolders.forEach((folder) => {
 			observer.observe(section);
 		});
 	</script>
+
+	<style>
+		/* Ticker Nav hiding scrollbar */
+		.no-scrollbar::-webkit-scrollbar {
+			display: none;
+		}
+		.no-scrollbar {
+			-ms-overflow-style: none;
+			scrollbar-width: none;
+		}
+	</style>
 </Layout>
