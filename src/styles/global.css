@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
 @theme {
+    /* Fonts */
     --font-sans: "Inter", sans-serif;
     --font-serif: "Playfair Display", serif;
+    --font-mono: "JetBrains Mono", monospace;
+
+    /* Colors - Obsidian Ledger Palette */
+    --color-obsidian: #050505;
+    --color-matte: #0A0A0A;
+    --color-structural: #27272A;
+    --color-flash: #FFFFFF;
+    --color-steel: #A1A1AA;
+    --color-trust: #007AFF;
 }
 
 html.lenis,
@@ -24,4 +34,34 @@ html.lenis body {
 
 .lenis.lenis-scrolling iframe {
     pointer-events: none;
+}
+
+/* Base Styles */
+body {
+    background-color: var(--color-obsidian);
+    color: var(--color-flash);
+    font-family: var(--font-sans);
+}
+
+/* Scrollbar styling for the 'financial terminal' look */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-matte);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-structural);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-trust);
+}
+
+/* Utility for sharp edges */
+.sharp {
+    border-radius: 0 !important;
 }
