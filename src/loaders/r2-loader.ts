@@ -120,8 +120,13 @@ export function r2Loader(config: R2LoaderConfig): Loader {
                     }
                     return;
                 } else {
-                    context.logger.error("R2 Credentials missing in production build.");
-                    throw new Error("Missing R2 Credentials");
+                    const missing = [];
+                    if (!config.bucket) missing.push("R2_BUCKET_NAME");
+                    if (!config.accessKeyId) missing.push("R2_ACCESS_KEY_ID");
+                    if (!config.secretAccessKey) missing.push("R2_SECRET_ACCESS_KEY");
+
+                    context.logger.error(`R2 Credentials missing in production build: ${missing.join(", ")}`);
+                    throw new Error(`Missing R2 Credentials: ${missing.join(", ")}`);
                 }
             }
 
