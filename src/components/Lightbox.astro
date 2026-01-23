@@ -1,0 +1,112 @@
+<script>
+  import PhotoSwipeLightbox from "photoswipe/lightbox";
+  import "photoswipe/style.css";
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: ".columns-1",
+    children: "a",
+    pswpModule: () => import("photoswipe"),
+  });
+
+  // UI - Metadata Caption
+  lightbox.on("uiRegister", function () {
+    lightbox.pswp?.ui?.registerElement({
+      name: "custom-caption",
+      order: 9,
+      isButton: false,
+      tagName: "div",
+      html: "Caption text",
+      appendTo: "root",
+      onInit: (el, pswp) => {
+        lightbox.pswp?.on("change", () => {
+          const currSlide = lightbox.pswp?.currSlide;
+          if (currSlide && currSlide.data && currSlide.data.element) {
+            const elData = (currSlide.data.element as HTMLElement).dataset; // Cast to HTMLElement
+
+            const file_name = elData.pswpName || "";
+            const camera = elData.pswpCamera || "";
+            const date = elData.pswpDate || "";
+            const aperture = elData.pswpAperture || "";
+            const iso = elData.pswpIso || "";
+            const shutter = elData.pswpShutter || "";
+            const focal_length = elData.pswpFocalLength || "";
+
+            let content = '<div class="pswp__custom-caption-content">';
+
+            // Row 1: Image Name
+            if (file_name) {
+              content += `<div class="pswp-meta-primary">${file_name}</div>`;
+            }
+
+            // Row 2: Tech Specs
+            const specs = [camera, focal_length, date, aperture, iso, shutter]
+              .filter(Boolean)
+              .join("  •  ");
+            if (specs) {
+              content += `<div class="pswp-meta-secondary">${specs}</div>`;
+            }
+
+            content += "</div>";
+            el.innerHTML = content;
+          }
+        });
+      },
+    });
+  });
+
+  // Click behavior - Open in new tab
+  // @ts-ignore
+  lightbox.on("contentClick", (e: any) => {
+    // Prevent default behavior (zoom/close)
+    e.originalEvent?.preventDefault();
+    e.event?.preventDefault();
+
+    if (lightbox.pswp?.currSlide?.data?.src) {
+      window.open(lightbox.pswp.currSlide.data.src, "_blank");
+    }
+  });
+
+  lightbox.init();
+</script>
+
+<style is:global>
+  .pswp__custom-caption {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+  }
+
+  .pswp__custom-caption-content {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    border-radius: 9999px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 90%;
+  }
+
+  .pswp-meta-primary {
+    color: white;
+    font-family: "Times New Roman", serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .pswp-meta-secondary {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+</style>

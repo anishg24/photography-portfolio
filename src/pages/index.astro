@@ -1,0 +1,317 @@
+---
+export const prerender = true;
+import Layout from "../layouts/Layout.astro";
+import Lightbox from "../components/Lightbox.astro";
+import StaticImage from "../components/StaticImage.astro";
+import { getCollection } from "astro:content";
+
+// Fetch photos from R2 collection
+const photos = await getCollection("photos");
+
+// Group photos by folder
+const groupedPhotos: Record<string, typeof photos> = {};
+
+photos.forEach((photo) => {
+	// Extract folder name from key (e.g. "Values/img.jpg" -> "Values")
+	// If no folder, use "Miscellaneous"
+	const parts = photo.data.key.split("/");
+	const folder = parts.length > 1 ? parts[0] : "Miscellaneous";
+
+	if (!groupedPhotos[folder]) {
+		groupedPhotos[folder] = [];
+	}
+	groupedPhotos[folder].push(photo);
+});
+
+// Sort folders: Alphabetical, with Miscellaneous last
+const sortedFolders = Object.keys(groupedPhotos).sort((a, b) => {
+	if (a === "Miscellaneous") return 1;
+	if (b === "Miscellaneous") return -1;
+	return a.localeCompare(b);
+});
+
+// Sort photos within folders (newest first)
+sortedFolders.forEach((folder) => {
+	groupedPhotos[folder].sort(
+		(a, b) =>
+			new Date(b.data.dateTaken).getTime() -
+			new Date(a.data.dateTaken).getTime(),
+	);
+});
+---
+
+<Layout title="Anish's Photography Portfolio">
+	<div class="flex flex-col lg:flex-row min-h-screen">
+		{/* Sidebar Navigation */}
+		<nav
+			class="lg:w-64 lg:h-screen lg:sticky lg:top-0 p-8 flex flex-col justify-center border-r border-neutral-900 bg-neutral-950/80 backdrop-blur-sm z-50"
+		>
+			<h1
+				class="text-xl font-serif font-light tracking-widest text-white uppercase mb-12 hidden lg:block"
+			>
+				Anish's Photos
+			</h1>
+			<div class="relative pl-4">
+				{/* Vertical Track */}
+				<div class="absolute left-0 top-2 bottom-2 w-px bg-neutral-800">
+				</div>
+
+				{/* Swimming Pill Indicator */}
+				<div
+					id="active-pill"
+					class="absolute -left-[3px] w-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-300 ease-out opacity-0 z-10"
+					style="height: 0px; top: 0px;"
+				>
+				</div>
+
+				<ul class="space-y-6 relative z-0">
+					{
+						sortedFolders.map((folder) => (
+							<li>
+								<a
+									href={`#${folder}`}
+									class="nav-link block pl-8 text-neutral-500 hover:text-white transition-colors duration-300 text-sm tracking-widest uppercase"
+									data-target={folder}
+								>
+									{folder}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+			<p class="mt-auto text-xs text-neutral-700 hidden lg:block">
+				&copy; {new Date().getFullYear()}
+			</p>
+		</nav>
+
+		{/* Main Content */}
+		<main class="flex-1 p-4 lg:p-8 ml-0 w-full">
+			<header class="mb-12 text-center lg:hidden">
+				<h1
+					class="text-3xl font-serif font-light tracking-widest text-white uppercase mb-4"
+				>
+					Anish's Photos
+				</h1>
+			</header>
+
+			{
+				Object.keys(groupedPhotos).length === 0 ? (
+					<div class="text-center py-20">
+						<p class="text-neutral-500">
+							No photos found. Upload some to R2!
+						</p>
+					</div>
+				) : (
+					<div class="space-y-32 pb-32">
+						{sortedFolders.map((folder) => {
+							const folderPhotos = groupedPhotos[folder];
+							// Calculate date range
+							const dates = folderPhotos.map((p) =>
+								new Date(p.data.dateTaken).getTime(),
+							);
+							const minDate = new Date(Math.min(...dates));
+							const maxDate = new Date(Math.max(...dates));
+
+							const formatDate = (d: Date) =>
+								d.toLocaleDateString("en-US", {
+									month: "short",
+									day: "numeric",
+									year: "numeric",
+								});
+
+							// Check if same day
+							const isSameDay =
+								minDate.toDateString() ===
+								maxDate.toDateString();
+
+							const dateRange =
+								isSameDay || dates.length < 2
+									? formatDate(minDate)
+									: formatDate(minDate) +
+										" - " +
+										formatDate(maxDate);
+
+							return (
+								<section
+									id={folder}
+									class="scroll-mt-24 section-folder"
+								>
+									<div class="flex items-center gap-4 mb-8">
+										<div class="h-px bg-neutral-800 flex-grow" />
+										<div class="text-center">
+											<h2 class="text-xl font-serif text-white font-light tracking-wider uppercase">
+												{folder}
+											</h2>
+											<p class="text-xs text-neutral-500 font-mono mt-1">
+												{dateRange}
+											</p>
+										</div>
+										<div class="h-px bg-neutral-800 flex-grow" />
+									</div>
+
+									<div class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+										{folderPhotos.map((photo) => {
+											const {
+												url,
+												key,
+												width,
+												height,
+												make,
+												model,
+												dateTaken,
+												fNumber,
+												iso,
+												exposureTime,
+												lensModel,
+												focalLength,
+											} = photo.data;
+
+											// Format Metadata
+											const camera =
+												make && model
+													? `${make} ${model}`
+													: model || make || "";
+											const date = new Date(
+												dateTaken,
+											).toLocaleDateString("en-US", {
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											});
+											const aperture = fNumber
+												? `f/${fNumber}`
+												: "";
+											const isoVal = iso
+												? `ISO ${iso}`
+												: "";
+											const shutter = exposureTime
+												? exposureTime < 1
+													? `1/${Math.round(1 / exposureTime)}`
+													: `${exposureTime}s`
+												: "";
+											const lens = lensModel || "";
+											const focalLen = focalLength
+												? `${Math.round(focalLength)}mm`
+												: "";
+
+											// Filename (remove folder)
+											const fileName =
+												key.split("/").pop() || key;
+
+											return (
+												<a
+													href={url}
+													data-pswp-width={
+														width || 2500
+													}
+													data-pswp-height={
+														height || 1667
+													}
+													target="_blank"
+													data-pswp-name={fileName}
+													data-pswp-camera={camera}
+													data-pswp-date={date}
+													data-pswp-aperture={
+														aperture
+													}
+													data-pswp-iso={isoVal}
+													data-pswp-shutter={shutter}
+													data-pswp-lens={lens}
+													data-pswp-focal-length={
+														focalLen
+													}
+													class="break-inside-avoid relative group overflow-hidden bg-neutral-900 rounded-sm block"
+												>
+													<StaticImage
+														src={url}
+														alt={key}
+														class="w-full h-auto"
+														imgClass="object-cover group-hover:scale-105"
+														loading="lazy"
+														width={width}
+														height={height}
+													/>
+													<div class="absolute inset-0 bg-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+														<span class="text-xs text-white/80 font-mono truncate w-full drop-shadow-md">
+															{key}
+														</span>
+													</div>
+												</a>
+											);
+										})}
+									</div>
+								</section>
+							);
+						})}
+					</div>
+				)
+			}
+
+			<Lightbox />
+		</main>
+	</div>
+
+	<script>
+		// Intersection Observer for Active State
+		const sections = document.querySelectorAll(".section-folder");
+		const navLinks = document.querySelectorAll(".nav-link");
+		const pill = document.getElementById("active-pill");
+
+		const observerOptions = {
+			root: null,
+			rootMargin: "-20% 0px -60% 0px", // Trigger when section is near top/middle
+			threshold: 0,
+		};
+
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					// Reset all links
+					navLinks.forEach((link) => {
+						link.classList.remove("text-white", "font-bold");
+						link.classList.add("text-neutral-500");
+					});
+
+					// Activate current link
+					const id = entry.target.id;
+					const activeLink = document.querySelector(
+						`.nav-link[data-target="${id}"]`,
+					) as HTMLElement;
+
+					if (activeLink && pill) {
+						// Update Link Styles
+						activeLink.classList.remove("text-neutral-500");
+						activeLink.classList.add("text-white", "font-bold");
+
+						// Move Pill
+						const container = pill.offsetParent as HTMLElement;
+						if (container) {
+							// Determine strictly vertical position relative to the UL container
+
+							const linkRect = activeLink.getBoundingClientRect();
+							const containerRect =
+								container.getBoundingClientRect();
+
+							const relativeTop =
+								linkRect.top - containerRect.top;
+							const linkHeight = activeLink.offsetHeight;
+
+							// Center fixed height indicator (20px)
+							const targetHeight = 20;
+							const offset = (linkHeight - targetHeight) / 2;
+
+							pill.style.opacity = "1";
+							pill.style.top = `${relativeTop + offset}px`;
+							pill.style.height = `${targetHeight}px`;
+						}
+					}
+				}
+			});
+		}, observerOptions);
+
+		sections.forEach((section) => {
+			observer.observe(section);
+		});
+	</script>
+</Layout>
