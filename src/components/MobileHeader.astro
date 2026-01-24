@@ -17,17 +17,17 @@ const { sortedFolders } = Astro.props;
             >
                 {/* Content duplicated for seamless loop */}
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
                 >
                     Anish Photography
                 </span>
@@ -37,17 +37,17 @@ const { sortedFolders } = Astro.props;
             >
                 {/* Duplicate container for seamless loop */}
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
                 >
                     Anish Photography
                 </span>
@@ -56,10 +56,10 @@ const { sortedFolders } = Astro.props;
     </div>
 
     <nav
-        class="overflow-x-auto no-scrollbar border-t border-[var(--color-structural)] bg-[var(--color-obsidian)]"
+        class="overflow-x-auto no-scrollbar border-t border-[var(--color-structural)] bg-[var(--color-obsidian)] scroll-smooth"
     >
         <ul
-            class="flex w-full justify-center whitespace-nowrap px-6 py-3 space-x-8"
+            class="inline-flex min-w-full justify-center whitespace-nowrap px-6 py-3 space-x-8"
         >
             {
                 sortedFolders.map((folder) => {
@@ -74,7 +74,7 @@ const { sortedFolders } = Astro.props;
                                 <span class="absolute left-0 top-0 bottom-0 w-full opacity-10 pointer-events-none z-0">
                                     <span class="block h-full bg-[var(--color-trust)] w-0 transition-all duration-100 ease-linear nav-progress-bar" />
                                 </span>
-                                <span class="relative z-10">| {folder} |</span>
+                                <span class="relative z-10">{folder}</span>
                             </a>
                         </li>
                     );
@@ -86,8 +86,25 @@ const { sortedFolders } = Astro.props;
 
 <script>
     // Smart Active State Progress for Mobile Header
+    let lastActiveSection: string | null = null;
+
     document.addEventListener("section-progress", ((e: CustomEvent) => {
         const { sectionId, progress } = e.detail;
+
+        // Auto-scroll logic if section changed
+        if (lastActiveSection !== sectionId) {
+            lastActiveSection = sectionId;
+            const activeLink = document.querySelector(
+                `.nav-link[data-target="${sectionId}"]`,
+            );
+            if (activeLink) {
+                activeLink.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center",
+                });
+            }
+        }
 
         // Update matching mobile links
         document
@@ -129,6 +146,6 @@ const { sortedFolders } = Astro.props;
     }
 
     .animate-marquee-ltr {
-        animation: scrollLeftToRight 20s linear infinite;
+        animation: scrollLeftToRight 40s linear infinite;
     }
 </style>

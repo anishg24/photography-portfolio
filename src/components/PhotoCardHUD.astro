@@ -1,0 +1,81 @@
+---
+interface Props {
+    make?: string;
+    model?: string;
+    iso?: number;
+    fNumber?: number;
+    shutter: string;
+    fileName: string;
+    scrambledFileName: string;
+}
+
+const { make, model, iso, fNumber, shutter, fileName, scrambledFileName } =
+    Astro.props;
+---
+
+<div
+    class="hud-overlay absolute inset-0 z-10 pointer-events-none p-4 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40"
+>
+    {/* Top Row */}
+    <div class="flex justify-between items-start">
+        {/* Top Left Hairline */}
+        <div class="relative pl-2 pt-2">
+            <div
+                class="absolute top-0 left-0 w-8 h-[1px] bg-[var(--color-trust)] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+            >
+            </div>
+            <div
+                class="absolute top-0 left-0 w-[1px] h-8 bg-[var(--color-trust)] origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100 ease-out"
+            >
+            </div>
+            <span
+                class="text-[10px] font-mono text-white/90 tracking-widest uppercase block filename-scramble"
+                data-real-value={fileName}
+                data-scrambled={scrambledFileName}>{scrambledFileName}</span
+            >
+        </div>
+
+        {/* Top Right Info */}
+        <div class="text-right">
+            <span
+                class="block text-[10px] font-mono text-[var(--color-trust)] tracking-widest"
+                >{make}</span
+            >
+            <span
+                class="block text-[10px] font-sans font-bold text-white tracking-wide"
+                >{model}</span
+            >
+        </div>
+    </div>
+
+    {/* Bottom Row */}
+    <div class="flex justify-between items-end">
+        {/* Tech Specs */}
+        <div class="text-[10px] font-mono space-y-1 text-neutral-300">
+            <div class="flex gap-3">
+                <span class="text-neutral-500 w-12">ISO</span>
+                <span class="text-[var(--color-flash)]">{iso || "RAW"}</span>
+            </div>
+            <div class="flex gap-3">
+                <span class="text-neutral-500 w-12">APERTURE</span>
+                <span class="text-[var(--color-flash)]">f/{fNumber}</span>
+            </div>
+            <div class="flex gap-3">
+                <span class="text-neutral-500 w-12">SHUTTER</span>
+                <span class="text-[var(--color-flash)]">{shutter}</span>
+            </div>
+        </div>
+
+        {/* Bottom Right Hairline */}
+        <div class="relative pr-2 pb-2">
+            <div
+                class="absolute bottom-0 right-0 w-8 h-[1px] bg-[var(--color-trust)] origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+            >
+            </div>
+            <div
+                class="absolute bottom-0 right-0 w-[1px] h-8 bg-[var(--color-trust)] origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100 ease-out"
+            >
+            </div>
+        </div>
+    </div>
+</div>

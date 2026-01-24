@@ -19,21 +19,21 @@ const { sortedFolders, totalPhotos } = Astro.props;
                 class="absolute inset-0 flex flex-col items-center animate-vertical-marquee"
             >
                 {/* Group 1 */}
-                <div class="flex flex-col gap-8 shrink-0 items-center">
+                <div class="flex flex-col gap-0 shrink-0 items-center">
                     {
                         Array.from({ length: 12 }).map(() => (
-                            <span class="vertical-text text-3xl font-serif font-bold tracking-[0.2em] text-neutral-700 hover:text-white transition-colors duration-300 whitespace-nowrap cursor-default select-none">
-                                ANISH PHOTOGRAPHY
+                            <span class="vertical-text text-3xl font-serif font-bold tracking-[0.2em] text-neutral-700 hover:text-white transition-colors duration-300 whitespace-nowrap cursor-default select-none py-12">
+                                ANISH PHOTOGRAPHY&nbsp;&nbsp;
                             </span>
                         ))
                     }
                 </div>
                 {/* Group 2 (Duplicate for loop) */}
-                <div class="flex flex-col gap-8 shrink-0 items-center">
+                <div class="flex flex-col gap-0 shrink-0 items-center">
                     {
                         Array.from({ length: 12 }).map(() => (
-                            <span class="vertical-text text-3xl font-serif font-bold tracking-[0.2em] text-neutral-700 hover:text-white transition-colors duration-300 whitespace-nowrap cursor-default select-none">
-                                ANISH PHOTOGRAPHY
+                            <span class="vertical-text text-3xl font-serif font-bold tracking-[0.2em] text-neutral-700 hover:text-white transition-colors duration-300 whitespace-nowrap cursor-default select-none py-12">
+                                ANISH PHOTOGRAPHY&nbsp;&nbsp;
                             </span>
                         ))
                     }
@@ -94,10 +94,12 @@ const { sortedFolders, totalPhotos } = Astro.props;
                 >
             </div>
             <div
-                class="flex justify-between items-center text-[10px] font-mono text-[var(--color-trust)] uppercase tracking-wider mt-1"
+                class="flex justify-between items-center text-[10px] font-mono uppercase tracking-wider mt-1"
             >
-                <span>MARKET STATUS</span>
-                <span>LIVE</span>
+                <span class="text-[var(--color-trust)]">MARKET STATUS</span>
+                <span id="market-status" class="text-[var(--color-trust)]"
+                    >LIVE</span
+                >
             </div>
         </div>
     </div>
@@ -154,6 +156,43 @@ const { sortedFolders, totalPhotos } = Astro.props;
                 activeLink.style.width = `${Math.max(0, Math.min(100, progress * 100))}%`;
             }
         }) as EventListener);
+
+        // Market Status Logic
+        function updateMarketStatus() {
+            const statusElement = document.getElementById("market-status");
+            if (!statusElement) return;
+
+            const now = new Date();
+            const nyTime = new Date(
+                now.toLocaleString("en-US", { timeZone: "America/New_York" }),
+            );
+
+            const day = nyTime.getDay(); // 0 is Sunday, 6 is Saturday
+            const hour = nyTime.getHours();
+            const minute = nyTime.getMinutes();
+
+            // Market Hours: Mon-Fri, 9:30 AM - 4:00 PM
+            const isWeekend = day === 0 || day === 6;
+            const isMarketHours =
+                (hour > 9 && hour < 16) || (hour === 9 && minute >= 30);
+
+            const isOpen = !isWeekend && isMarketHours;
+
+            statusElement.innerText = isOpen ? "LIVE" : "OFFLINE";
+
+            // Optional: Update color based on status
+            if (isOpen) {
+                statusElement.classList.remove("text-neutral-500");
+                statusElement.classList.add("text-[var(--color-trust)]");
+            } else {
+                statusElement.classList.remove("text-[var(--color-trust)]");
+                statusElement.classList.add("text-neutral-500");
+            }
+        }
+
+        // Run immediately and update every minute
+        updateMarketStatus();
+        setInterval(updateMarketStatus, 60000);
     </script>
 </nav>
 
@@ -166,7 +205,7 @@ const { sortedFolders, totalPhotos } = Astro.props;
     }
 
     .animate-vertical-marquee {
-        animation: scrollUp 90s linear infinite;
+        animation: scrollUp 40s linear infinite;
     }
 
     /* Scroll from 0 (bottom of track due to rotation?) to -50% */

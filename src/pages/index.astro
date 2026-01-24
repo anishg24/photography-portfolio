@@ -27,10 +27,26 @@ photos.forEach((photo) => {
 });
 
 // Sort folders: Alphabetical, with Miscellaneous last
+// Sort folders: Chronological (newest photo first), with Miscellaneous last
 const sortedFolders = Object.keys(groupedPhotos).sort((a, b) => {
 	if (a === "Miscellaneous") return 1;
 	if (b === "Miscellaneous") return -1;
-	return a.localeCompare(b);
+
+	// Get latest date for folder A
+	const photosA = groupedPhotos[a];
+	const latestDateA = photosA.reduce((max, p) => {
+		const d = new Date(p.data.dateTaken).getTime();
+		return d > max ? d : max;
+	}, 0);
+
+	// Get latest date for folder B
+	const photosB = groupedPhotos[b];
+	const latestDateB = photosB.reduce((max, p) => {
+		const d = new Date(p.data.dateTaken).getTime();
+		return d > max ? d : max;
+	}, 0);
+
+	return latestDateB - latestDateA;
 });
 
 // Sort photos within folders (newest first)
