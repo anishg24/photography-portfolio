@@ -9,19 +9,58 @@ const { sortedFolders } = Astro.props;
 <header
     class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-[var(--color-structural)]"
 >
-    <div class="p-6 pb-2 text-center">
-        <h1
-            class="text-2xl font-serif font-bold tracking-tight text-white uppercase"
-        >
-            Anish Photography
-        </h1>
+    <div class="p-6 pb-2 overflow-hidden relative w-full">
+        {/* Marquee Wrapper */}
+        <div class="flex overflow-hidden w-full">
+            <div
+                class="animate-marquee-ltr flex whitespace-nowrap min-w-full shrink-0 items-center justify-around"
+            >
+                {/* Content duplicated for seamless loop */}
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                >
+                    Anish Photography
+                </span>
+            </div>
+            <div
+                class="animate-marquee-ltr flex whitespace-nowrap min-w-full shrink-0 items-center justify-around"
+            >
+                {/* Duplicate container for seamless loop */}
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-white uppercase mx-4"
+                >
+                    Anish Photography
+                </span>
+            </div>
+        </div>
     </div>
 
-    {/* Horizontal Ticker Nav */}
     <nav
         class="overflow-x-auto no-scrollbar border-t border-[var(--color-structural)] bg-[var(--color-obsidian)]"
     >
-        <ul class="flex whitespace-nowrap px-6 py-3 space-x-8">
+        <ul
+            class="flex w-full justify-center whitespace-nowrap px-6 py-3 space-x-8"
+        >
             {
                 sortedFolders.map((folder) => {
                     const slug = folder.toLowerCase().replace(/\s+/g, "-");
@@ -78,5 +117,18 @@ const { sortedFolders } = Astro.props;
     .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
+    }
+
+    @keyframes scrollLeftToRight {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(0%);
+        }
+    }
+
+    .animate-marquee-ltr {
+        animation: scrollLeftToRight 20s linear infinite;
     }
 </style>

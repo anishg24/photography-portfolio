@@ -82,7 +82,7 @@ const scrambledFileName = scramble(fileName);
 
         {/* HUD Overlay */}
         <div
-            class="absolute inset-0 z-10 pointer-events-none p-4 flex flex-col justify-between opacity-0 group-hover:opacity-100 mobile-active:opacity-100 transition-opacity duration-500 bg-black/40"
+            class="hud-overlay absolute inset-0 z-10 pointer-events-none p-4 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40"
         >
             {/* Top Row */}
             <div class="flex justify-between items-start">
@@ -201,201 +201,174 @@ const scrambledFileName = scramble(fileName);
         document
             .querySelectorAll(".photo-card-wrapper")
             .forEach((cardWrapper) => {
-                const card = cardWrapper as HTMLElement;
-                const filenameEl = card.querySelector(
+                const wrapper = cardWrapper as HTMLElement;
+                const filenameEl = wrapper.querySelector(
                     ".filename-scramble",
                 ) as HTMLElement;
 
-                // Wrapper scope for listeners
-                const wrapper = card;
-
                 if (filenameEl) {
-                    // Trigger only on first hover
                     const onMouseEnter = () => {
                         unscrambleText(filenameEl);
-                        card.removeEventListener("mouseenter", onMouseEnter);
+                        wrapper.removeEventListener("mouseenter", onMouseEnter);
                     };
-                    card.addEventListener("mouseenter", onMouseEnter);
+                    wrapper.addEventListener("mouseenter", onMouseEnter);
                 }
             });
 
-        // Loupe Logic
-        const wrappers = document.querySelectorAll(".photo-card-wrapper");
-        wrappers.forEach((cardWrapper) => {
-            if (cardWrapper.hasAttribute("data-loupe-init")) return;
-            cardWrapper.setAttribute("data-loupe-init", "true");
+        // Loupe & HUD Logic
+        document
+            .querySelectorAll(".photo-card-wrapper")
+            .forEach((cardWrapper) => {
+                if (cardWrapper.hasAttribute("data-loupe-init")) return;
+                cardWrapper.setAttribute("data-loupe-init", "true");
 
-            const wrapper = cardWrapper as HTMLElement;
-            const link = wrapper.querySelector("a");
-            const img = wrapper.querySelector("div.z-0 img");
-            const loupeContainer = wrapper.querySelector(
-                ".loupe-container",
-            ) as HTMLElement;
-            const loupeImg = loupeContainer?.querySelector(
-                "img",
-            ) as HTMLImageElement;
+                const wrapper = cardWrapper as HTMLElement;
+                const link = wrapper.querySelector("a");
+                const img = wrapper.querySelector("div.z-0 img");
+                const loupeContainer = wrapper.querySelector(
+                    ".loupe-container",
+                ) as HTMLElement;
+                const loupeImg = loupeContainer?.querySelector(
+                    "img",
+                ) as HTMLImageElement;
+                const hud = wrapper.querySelector(".hud-overlay");
 
-            if (!link || !img || !loupeContainer || !loupeImg) return;
+                if (!link || !img || !loupeContainer || !loupeImg) return;
 
-            let isShiftPressed = false;
-            let zoomLevel = 1;
-            let lastX = 0;
-            let lastY = 0;
+                let isShiftPressed = false;
+                let zoomLevel = 1;
+                let lastX = 0;
+                let lastY = 0;
 
-            const checkShift = (e: KeyboardEvent) => {
-                isShiftPressed = e.shiftKey;
-                if (!isShiftPressed) {
-                    loupeContainer.style.display = "none";
-                    link.style.cursor = "crosshair";
-                } else if (link.matches(":hover")) {
-                    link.style.cursor = "none";
-                }
-            };
+                // Touch interaction state
+                let isTouchInteraction = false;
+                link.addEventListener(
+                    "touchstart",
+                    () => {
+                        isTouchInteraction = true;
+                    },
+                    { passive: true },
+                );
 
-            window.addEventListener("keydown", checkShift);
-            window.addEventListener("keyup", checkShift);
-
-            link.addEventListener("mousemove", (e) => {
-                if (!e.shiftKey) {
-                    loupeContainer.style.display = "none";
-                    link.style.cursor = "crosshair";
-                    return;
-                }
-
-                // Lazy load
-                if (!loupeImg.src) {
-                    loupeImg.src = loupeImg.getAttribute("data-src") || "";
-                }
-
-                loupeContainer.style.display = "block";
-                link.style.cursor = "none";
-
-                loupeContainer.style.left = `${e.clientX}px`;
-                loupeContainer.style.top = `${e.clientY}px`;
-
-                const rect = img.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                lastX = x / rect.width;
-                lastY = y / rect.height;
-
-                const realWidth = parseInt(link.dataset.pswpWidth || "2500");
-                const realHeight = parseInt(link.dataset.pswpHeight || "1667");
-
-                loupeImg.style.width = `${realWidth * zoomLevel}px`;
-                loupeImg.style.height = `${realHeight * zoomLevel}px`;
-
-                loupeImg.style.left = `-${lastX * realWidth * zoomLevel - 128}px`;
-                loupeImg.style.top = `-${lastY * realHeight * zoomLevel - 128}px`;
-            });
-
-            link.addEventListener(
-                "wheel",
-                (e) => {
-                    if (!isShiftPressed) return;
-                    e.preventDefault();
-
-                    const delta = -Math.sign(e.deltaY) * 0.5;
-                    zoomLevel = Math.max(1, Math.min(5, zoomLevel + delta));
-
-                    if (loupeContainer.style.display !== "none") {
-                        const realWidth = parseInt(
-                            link.dataset.pswpWidth || "2500",
-                        );
-                        const realHeight = parseInt(
-                            link.dataset.pswpHeight || "1667",
-                        );
-
-                        loupeImg.style.width = `${realWidth * zoomLevel}px`;
-                        loupeImg.style.height = `${realHeight * zoomLevel}px`;
-
-                        loupeImg.style.left = `-${lastX * realWidth * zoomLevel - 128}px`;
-                        loupeImg.style.top = `-${lastY * realHeight * zoomLevel - 128}px`;
+                const checkShift = (e: KeyboardEvent) => {
+                    isShiftPressed = e.shiftKey;
+                    if (!isShiftPressed) {
+                        loupeContainer.style.display = "none";
+                        link.style.cursor = "crosshair";
+                    } else if (link.matches(":hover")) {
+                        link.style.cursor = "none";
                     }
-                },
-                { passive: false },
-            );
+                };
 
-            link.addEventListener("mouseleave", () => {
-                loupeContainer.style.display = "none";
-            });
+                window.addEventListener("keydown", checkShift);
+                window.addEventListener("keyup", checkShift);
 
-            link.addEventListener(
-                "click",
-                (e) => {
-                    if (e.shiftKey) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                link.addEventListener("mousemove", (e) => {
+                    if (!e.shiftKey) {
+                        loupeContainer.style.display = "none";
+                        link.style.cursor = "crosshair";
+                        return;
                     }
-                    // Mobile Tap: Toggle HUD
-                    wrapper.classList.toggle("mobile-active");
-                },
-                true,
-            );
 
-            // Touch Support
-            let isLongPress = false;
-            let timer: NodeJS.Timeout;
-
-            const updateLoupePosition = (touch: Touch | MouseEvent) => {
-                const rect = img.getBoundingClientRect();
-                const x = touch.clientX - rect.left;
-                const y = touch.clientY - rect.top;
-
-                if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-
-                loupeContainer.style.left = `${touch.clientX}px`;
-                loupeContainer.style.top = `${touch.clientY - 80}px`;
-
-                const xPct = x / rect.width;
-                const yPct = y / rect.height;
-
-                const realWidth = parseInt(link.dataset.pswpWidth || "2500");
-                const realHeight = parseInt(link.dataset.pswpHeight || "1667");
-
-                loupeImg.style.width = `${realWidth * zoomLevel}px`;
-                loupeImg.style.height = `${realHeight * zoomLevel}px`;
-
-                loupeImg.style.left = `-${xPct * realWidth * zoomLevel - 128}px`;
-                loupeImg.style.top = `-${yPct * realHeight * zoomLevel - 128}px`;
-            };
-
-            const onTouchStart = (e: TouchEvent) => {
-                isLongPress = false;
-                timer = setTimeout(() => {
-                    isLongPress = true;
-                    if (!loupeImg.src)
+                    if (!loupeImg.src) {
                         loupeImg.src = loupeImg.getAttribute("data-src") || "";
+                    }
+
                     loupeContainer.style.display = "block";
                     link.style.cursor = "none";
-                    updateLoupePosition(e.touches[0]);
-                }, 500);
-            };
 
-            const onTouchEnd = () => {
-                clearTimeout(timer);
-                loupeContainer.style.display = "none";
-                link.style.cursor = "crosshair";
-            };
+                    loupeContainer.style.left = `${e.clientX}px`;
+                    loupeContainer.style.top = `${e.clientY}px`;
 
-            const onTouchMove = (e: TouchEvent) => {
-                if (isLongPress) {
-                    if (e.cancelable) e.preventDefault();
-                    updateLoupePosition(e.touches[0]);
-                } else {
-                    clearTimeout(timer);
-                }
-            };
+                    const rect = img.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
 
-            link.addEventListener("touchstart", onTouchStart, {
-                passive: true,
+                    lastX = x / rect.width;
+                    lastY = y / rect.height;
+
+                    const realWidth = parseInt(
+                        link.dataset.pswpWidth || "2500",
+                    );
+                    const realHeight = parseInt(
+                        link.dataset.pswpHeight || "1667",
+                    );
+
+                    loupeImg.style.width = `${realWidth * zoomLevel}px`;
+                    loupeImg.style.height = `${realHeight * zoomLevel}px`;
+
+                    loupeImg.style.left = `-${lastX * realWidth * zoomLevel - 128}px`;
+                    loupeImg.style.top = `-${lastY * realHeight * zoomLevel - 128}px`;
+                });
+
+                link.addEventListener(
+                    "wheel",
+                    (e) => {
+                        if (!isShiftPressed) return;
+                        e.preventDefault();
+
+                        const delta = -Math.sign(e.deltaY) * 0.5;
+                        zoomLevel = Math.max(1, Math.min(5, zoomLevel + delta));
+
+                        if (loupeContainer.style.display !== "none") {
+                            const realWidth = parseInt(
+                                link.dataset.pswpWidth || "2500",
+                            );
+                            const realHeight = parseInt(
+                                link.dataset.pswpHeight || "1667",
+                            );
+
+                            loupeImg.style.width = `${realWidth * zoomLevel}px`;
+                            loupeImg.style.height = `${realHeight * zoomLevel}px`;
+
+                            loupeImg.style.left = `-${lastX * realWidth * zoomLevel - 128}px`;
+                            loupeImg.style.top = `-${lastY * realHeight * zoomLevel - 128}px`;
+                        }
+                    },
+                    { passive: false },
+                );
+
+                link.addEventListener("mouseleave", () => {
+                    loupeContainer.style.display = "none";
+                });
+
+                link.addEventListener(
+                    "click",
+                    (e) => {
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                        }
+
+                        // Mobile "Tap to Peek" Logic
+                        if (isTouchInteraction) {
+                            const isActive =
+                                wrapper.classList.contains("mobile-active");
+
+                            if (!isActive) {
+                                e.preventDefault();
+                                e.stopImmediatePropagation();
+                                wrapper.classList.add("mobile-active");
+                                // Fallback for styling
+                                if (hud)
+                                    (hud as HTMLElement).style.opacity = "1";
+                            }
+                            // If active, let event bubble to PhotoSwipe
+                        }
+                    },
+                    true,
+                );
             });
-            link.addEventListener("touchend", onTouchEnd);
-            link.addEventListener("touchmove", onTouchMove, { passive: false });
-        });
     };
 
     initCards();
     document.addEventListener("astro:page-load", initCards);
 </script>
+
+<style is:global>
+    /* Mobile Active State for HUD */
+    .photo-card-wrapper.mobile-active .hud-overlay {
+        opacity: 1 !important;
+    }
+</style>
