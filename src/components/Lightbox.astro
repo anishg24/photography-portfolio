@@ -35,7 +35,7 @@
 
             // Row 1: Image Name
             if (file_name) {
-              content += `<div class="pswp-meta-primary">${file_name.replace(".jpg", "").replace("_", " ")}</div>`;
+              content += `<div class="pswp-meta-primary">${file_name.replace(".jpg", "").replaceAll("_", " ")}</div>`;
             }
 
             // Row 2: Tech Specs
