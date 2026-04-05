@@ -5,6 +5,8 @@ import AutoScrollButton from "./AutoScrollButton";
 interface Photo {
     id: string;
     body?: string;
+    thumbnailUrl?: string;
+    fullUrl?: string;
     data: {
         title?: string;
         date?: string;
@@ -26,24 +28,7 @@ interface ReactGalleryProps {
     sortedFolders: string[];
 }
 
-/**
- * Build an optimized thumbnail URL via Astro's built-in /_image endpoint.
- * The src coming from astro:content is already a pre-resolved @fs path;
- * we just swap the query params to request a smaller WebP rendition.
- * Gallery cards are rendered at ~500px max on desktop (3-col grid inside
- * a ~1200px container minus the 288px sidebar).
- */
-function buildOptimizedSrc(src: string, width: number): string {
-    // Strip existing origWidth/origHeight/origFormat params to get the raw path
-    const basePath = src.split('?')[0];
-    const params = new URLSearchParams({
-        href: basePath,
-        w: String(width),
-        f: 'webp',
-        q: '80',
-    });
-    return `/_image?${params.toString()}`;
-}
+
 
 /**
  * Programmatically generates a 256x256 displacement map acting as a convex
@@ -139,11 +124,7 @@ function PhotoCard({ photo, isFirstFolder, pIdx, setFocusedPhoto }: { photo: Pho
                         willChange: "transform",
                         filter: 'url(#liquid-glass-refraction)'
                     }}
-                    src={buildOptimizedSrc(photo.data.image.src, 800)}
-                    srcSet={[
-                        `${buildOptimizedSrc(photo.data.image.src, 800)} 1x`,
-                        `${buildOptimizedSrc(photo.data.image.src, 1600)} 2x`,
-                    ].join(', ')}
+                    src={photo.thumbnailUrl || photo.data.image.src}
                     alt={photo.data.title || photo.id}
                     className="w-full h-auto object-cover contrast-[1.15] relative z-10"
                     loading={isFirstFolder && pIdx < 3 ? "eager" : "lazy"}
@@ -342,7 +323,7 @@ function FocusView({ photo, onClose }: { photo: Photo, onClose: () => void }) {
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
                         <img
-                            src={photo.data.image.src}
+                            src={photo.fullUrl || photo.data.image.src}
                             alt={photo.data.title}
                             className="max-h-[70vh] lg:max-h-[85vh] max-w-full object-contain shadow-2xl rounded-sm"
                             onClick={(e) => e.stopPropagation()}

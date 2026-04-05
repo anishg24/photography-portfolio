@@ -6,6 +6,7 @@ import MobileHeader from "../components/MobileHeader.astro";
 import DesktopSidebar from "../components/DesktopSidebar.astro";
 import MobileFooter from "../components/MobileFooter.astro";
 import { getCollection } from "astro:content";
+import { getImage } from "astro:assets";
 
 // Fetch photos from local portfolio collection
 const photos = await getCollection("portfolio");
@@ -48,6 +49,22 @@ sortedFolders.forEach((folder) => {
         }
 	);
 });
+
+// Pre-optimize images for ReactGallery to work correctly on Cloudflare Pages
+const optimizedGroupedPhotos: Record<string, any[]> = {};
+for (const folder of sortedFolders) {
+    optimizedGroupedPhotos[folder] = await Promise.all(
+        groupedPhotos[folder].map(async (photo) => {
+            const thumbnail = await getImage({ src: photo.data.image, width: 800, format: 'webp', quality: 80 });
+            const full = await getImage({ src: photo.data.image, width: 1600, format: 'webp', quality: 90 });
+            return {
+                ...photo,
+                thumbnailUrl: thumbnail.src,
+                fullUrl: full.src,
+            };
+        })
+    );
+}
 
 const generateCollectionId = (folderName: string) => {
 	// Split by space or special characters
@@ -92,7 +109,7 @@ const generateCollectionId = (folderName: string) => {
 				) : (
                     <ReactGallery 
                         client:load 
-                        groupedPhotos={groupedPhotos} 
+                        groupedPhotos={optimizedGroupedPhotos} 
                         sortedFolders={sortedFolders} 
                     />
 				)
