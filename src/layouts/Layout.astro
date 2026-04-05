@@ -31,16 +31,79 @@ const { title, description = "Anish's Photography Portfolio" } = Astro.props;
     <slot />
     <script>
       import Lenis from "lenis";
+      import { WebHaptics } from "web-haptics";
+
+      // ─── Lenis default lerp ───────────────────────────────────────────────────
+      const LERP_DEFAULT  = 0.08;   // Normal smooth scroll inertia
+      const LERP_DETENT   = 0.018;  // Heavy, viscous resistance at album boundary
+      const DETENT_WINDOW = 220;    // px around a section boundary that triggers resistance
+      const DETENT_DECAY  = 180;    // ms to restore lerp after passing the boundary
 
       // Initialize Lenis
       const lenis = new Lenis({
         autoRaf: true,
+        lerp: LERP_DEFAULT,
+      });
+
+      // Listen for custom pause/play events from ReactGallery
+      window.addEventListener('lenis-pause', () => lenis.stop());
+      window.addEventListener('lenis-play', () => lenis.start());
+
+      // Initialize Web Haptics (Must showSwitch to bypass iOS display:none limitations)
+      const haptics = new WebHaptics({ showSwitch: true });
+      (window as any).haptics = haptics;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      // ─── Album Boundary Detent ────────────────────────────────────────────────
+      // Collect section top offsets once layout is stable.
+      let sectionBoundaries: number[] = [];
+      let detentRestoreTimer: ReturnType<typeof setTimeout> | null = null;
+      let currentlyInDetent = false;
+
+      /** Refresh cached section offsets (call on resize / font-load). */
+      const refreshBoundaries = () => {
+        const sections = document.querySelectorAll<HTMLElement>(".section-folder");
+        sectionBoundaries = Array.from(sections)
+          // Skip the very first album — entering from the top of the page
+          // shouldn't feel like crossing a boundary.
+          .slice(1)
+          .map((el) => el.getBoundingClientRect().top + window.scrollY);
+      };
+
+      window.addEventListener("load", refreshBoundaries);
+      window.addEventListener("resize", refreshBoundaries, { passive: true });
+      // Run once after a small delay so Astro/React can finish rendering.
+      setTimeout(refreshBoundaries, 400);
+
+      lenis.on("scroll", () => {
+        const scrollY = lenis.scroll;
+
+        const nearBoundary = sectionBoundaries.some(
+          (boundary) => Math.abs(scrollY - boundary) < DETENT_WINDOW
+        );
+
+        if (nearBoundary && !currentlyInDetent) {
+          // Enter resistance zone
+          currentlyInDetent = true;
+          (lenis as any).options.lerp = LERP_DETENT;
+
+          if (detentRestoreTimer) clearTimeout(detentRestoreTimer);
+        }
+
+        if (!nearBoundary && currentlyInDetent) {
+          // Left the resistance zone — restore lerp after a short decay
+          if (detentRestoreTimer) clearTimeout(detentRestoreTimer);
+          detentRestoreTimer = setTimeout(() => {
+            (lenis as any).options.lerp = LERP_DEFAULT;
+            currentlyInDetent = false;
+          }, DETENT_DECAY);
+        }
       });
 
       // Handle anchor links for smooth scrolling via Lenis
-      // Native scroll-behavior: smooth is disabled by Lenis CSS
       document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener("click", (e) => {
+          haptics.trigger("selection");
           e.preventDefault();
           const target = e.currentTarget as HTMLAnchorElement;
           const targetId = target.getAttribute("href");
@@ -49,6 +112,108 @@ const { title, description = "Anish's Photography Portfolio" } = Astro.props;
             if (targetElement) {
               lenis.scrollTo(targetElement as HTMLElement);
             }
+          }
+        });
+      });
+
+      // Web Audio Engine setup (Desktop Only)
+      let audioCtx: AudioContext | null = null;
+      let lastTickScroll = 0;
+      const TICK_THRESHOLD = 300; // Tick every 300px
+
+      // Must be initialized on first interaction per browser policies
+      const initAudio = () => {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+        
+        // iOS requires resume() and a silent play inside the literal user interaction event
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        
+        // Play silent sound to fully unlock audio engine on Safari
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.001);
+
+        document.removeEventListener('click', initAudio);
+        document.removeEventListener('touchstart', initAudio);
+        document.removeEventListener('wheel', initAudio);
+        document.removeEventListener('keydown', initAudio);
+        document.removeEventListener('pointerdown', initAudio);
+      };
+
+      if (!isMobile) {
+        document.addEventListener('click', initAudio, { once: true });
+        document.addEventListener('touchstart', initAudio, { once: true });
+        document.addEventListener('wheel', initAudio, { passive: true, once: true });
+        document.addEventListener('keydown', initAudio, { once: true });
+        document.addEventListener('pointerdown', initAudio, { once: true });
+      }
+
+      const playTick = () => {
+        // Disable our custom synthesized audio track if we are on mobile
+        if (isMobile) return;
+
+        if (!audioCtx) return;
+        // The scroll handler cannot reliably unlock audio on iOS, but it can play if unlocked
+        if (audioCtx.state === 'suspended') return;
+
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        // Standard deep, subtle click sound for Desktop
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+        // Very fast fade out to avoid popping while keeping it crisp
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.03);
+      };
+
+      // Cache section elements once — queried after DOM is ready
+      let cachedSections: NodeListOf<Element> | null = null;
+
+      lenis.on('scroll', (e) => {
+        const currentScroll = typeof e.scroll === 'number' ? e.scroll : window.scrollY;
+
+        // Audio tick — only dispatched every TICK_THRESHOLD px to avoid jank
+        if (Math.abs(currentScroll - lastTickScroll) >= TICK_THRESHOLD) {
+          playTick();
+          lastTickScroll = currentScroll;
+        }
+
+        // Section progress — previously a separate native scroll listener;
+        // running inside Lenis keeps it on the same RAF frame and avoids double work.
+        if (!cachedSections) {
+          cachedSections = document.querySelectorAll('.section-folder');
+        }
+        const viewportHeight = window.innerHeight;
+        cachedSections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          const distance = -rect.top;
+          const progress = distance / (rect.height - viewportHeight / 2);
+          if (progress >= -0.1 && progress <= 1.1) {
+            document.dispatchEvent(
+              new CustomEvent('section-progress', {
+                detail: {
+                  sectionId: section.id,
+                  progress: Math.max(0, Math.min(1, progress)),
+                },
+              }),
+            );
           }
         });
       });

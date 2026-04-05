@@ -1,24 +1,23 @@
 ---
 export const prerender = true;
 import Layout from "../layouts/Layout.astro";
-import Lightbox from "../components/Lightbox.astro";
+import ReactGallery from "../components/ReactGallery";
 import MobileHeader from "../components/MobileHeader.astro";
 import DesktopSidebar from "../components/DesktopSidebar.astro";
-import FolderSection from "../components/FolderSection.astro";
 import MobileFooter from "../components/MobileFooter.astro";
 import { getCollection } from "astro:content";
 
-// Fetch photos from R2 collection
-const photos = await getCollection("photos");
+// Fetch photos from local portfolio collection
+const photos = await getCollection("portfolio");
 
-// Group photos by folder
+// Group photos by folder (album) instead of year
 const groupedPhotos: Record<string, typeof photos> = {};
 
 photos.forEach((photo) => {
-	// Extract folder name from key (e.g. "Values/img.jpg" -> "Values")
-	// If no folder, use "Miscellaneous"
-	const parts = photo.data.key.split("/");
-	const folder = parts.length > 1 ? parts[0] : "Miscellaneous";
+	// e.g. "San Diego Zoo/PIC.jpg" -> "San Diego Zoo"
+	const folderParts = photo.id.split("/");
+	const folderRaw = folderParts.length > 1 ? folderParts[0] : "Ungrouped";
+	const folder = folderRaw.replace(/-/g, ' ');
 
 	if (!groupedPhotos[folder]) {
 		groupedPhotos[folder] = [];
@@ -26,35 +25,27 @@ photos.forEach((photo) => {
 	groupedPhotos[folder].push(photo);
 });
 
-// Sort folders: Alphabetical, with Miscellaneous last
-// Sort folders: Chronological (newest photo first), with Miscellaneous last
+// Function to get the latest date in a folder
+const getFolderDate = (folder: string) => {
+	const dates = groupedPhotos[folder].map(p => p.data.date ? new Date(p.data.date).getTime() : 0);
+	return Math.max(...dates);
+};
+
+// Sort folders chronologically (newest first)
 const sortedFolders = Object.keys(groupedPhotos).sort((a, b) => {
-	if (a === "Miscellaneous") return 1;
-	if (b === "Miscellaneous") return -1;
-
-	// Get latest date for folder A
-	const photosA = groupedPhotos[a];
-	const latestDateA = photosA.reduce((max, p) => {
-		const d = new Date(p.data.dateTaken).getTime();
-		return d > max ? d : max;
-	}, 0);
-
-	// Get latest date for folder B
-	const photosB = groupedPhotos[b];
-	const latestDateB = photosB.reduce((max, p) => {
-		const d = new Date(p.data.dateTaken).getTime();
-		return d > max ? d : max;
-	}, 0);
-
-	return latestDateB - latestDateA;
+	if (a === "Ungrouped") return 1;
+	if (b === "Ungrouped") return -1;
+	return getFolderDate(b) - getFolderDate(a);
 });
 
 // Sort photos within folders (newest first)
 sortedFolders.forEach((folder) => {
 	groupedPhotos[folder].sort(
-		(a, b) =>
-			new Date(b.data.dateTaken).getTime() -
-			new Date(a.data.dateTaken).getTime(),
+		(a, b) => {
+            const dateA = a.data.date ? new Date(a.data.date).getTime() : 0;
+            const dateB = b.data.date ? new Date(b.data.date).getTime() : 0;
+            return dateB - dateA;
+        }
 	);
 });
 
@@ -99,72 +90,22 @@ const generateCollectionId = (folderName: string) => {
 						</p>
 					</div>
 				) : (
-					<div class="space-y-40 pb-32 lg:pb-0">
-						{sortedFolders.map((folder) => (
-							<FolderSection
-								folder={folder}
-								folderPhotos={groupedPhotos[folder]}
-								collectionId={generateCollectionId(folder)}
-							/>
-						))}
-					</div>
+                    <ReactGallery 
+                        client:load 
+                        groupedPhotos={groupedPhotos} 
+                        sortedFolders={sortedFolders} 
+                    />
 				)
 			}
-
-			<Lightbox />
 		</main>
 
 		<MobileFooter totalPhotos={photos.length} />
 	</div>
 
 	<script>
-		const navSections = Array.from(
-			document.querySelectorAll(".section-folder"),
-		);
+		import { WebHaptics } from "web-haptics";
+		const haptics = new WebHaptics();
 
-		// Scroll Progress for Smart Active States
-		window.addEventListener(
-			"scroll",
-			() => {
-				navSections.forEach((section) => {
-					const rect = section.getBoundingClientRect();
-					const scrollTop = window.scrollY;
-					const viewportHeight = window.innerHeight;
-					const sectionTop = rect.top + scrollTop;
-					const sectionHeight = rect.height;
-
-					// Standard Read Progress: (ScrollTop - SectionTop) / (SectionHeight - ViewportHeight)
-					// Adjusted so it starts 0 when section enters, 1 when section leaves?
-					// Or standard article progress: 0 when top of section matches top of viewport?
-					// Let's do: 0% when section top hits 1/3 viewport, 100% when section bottom hits 1/3 viewport?
-					// Or simpler: (scrollTop + viewportHeight/2 - sectionTop) / sectionHeight
-
-					// Actually, let's stick to "visible percentage" or "distance from top".
-					// The user wants it to fill up as they read.
-					// Start filling when the header crosses the "active threshold" (usually midway or top).
-					// Let's use relative computation from the intersection observer logic.
-
-					const distance = -rect.top; // How far section top is from viewport top. If positive, we are inside or past it.
-					const progress =
-						distance / (sectionHeight - viewportHeight / 2);
-
-					if (progress >= -0.1 && progress <= 1.1) {
-						document.dispatchEvent(
-							new CustomEvent("section-progress", {
-								detail: {
-									sectionId: section.id,
-									progress: Math.max(
-										0,
-										Math.min(1, progress),
-									),
-								},
-							}),
-						);
-					}
-				});
-			},
-			{ passive: true },
-		);
 
 		// Intersection Observer for Active State
 		const sections = document.querySelectorAll(".section-folder");
@@ -177,10 +118,17 @@ const generateCollectionId = (folderName: string) => {
 			threshold: 0,
 		};
 
+		let activeSectionId: string | null = null;
+
 		const observer = new IntersectionObserver((entries) => {
 			entries.forEach((entry) => {
 				if (entry.isIntersecting) {
 					const id = entry.target.id;
+
+					if (activeSectionId && activeSectionId !== id) {
+						haptics.trigger("heavy");
+					}
+					activeSectionId = id;
 
 					// Reset and activate all links pointing to this target (mobile + desktop)
 					navLinks.forEach((link) => {

@@ -125,3 +125,13 @@ body {
     animation: drawVertical 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     animation-delay: 0.1s;
 }
+
+/* 
+ * Hide Lochie's WebHaptics switch visually, but DO NOT use display:none or visibility:hidden.
+ * By keeping it structurally rendered with opacity: 0 and pointer-events: none, iOS Safari 
+ * respects programmatic `.click()` events on the <input switch> and triggers physical haptics natively!
+ */
+label[for^="web-haptics-"] {
+    opacity: 0.0001 !important;
+    pointer-events: none !important;
+}

@@ -2,6 +2,8 @@ import { defineConfig, envField } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 
+import react from '@astrojs/react';
+
 // https://astro.build/config
 export default defineConfig({
   env: {
@@ -13,6 +15,7 @@ export default defineConfig({
       R2_PUBLIC_DOMAIN: envField.string({ context: 'server', access: 'secret' }),
     }
   },
+
   vite: {
     plugins: [tailwindcss()],
   },
@@ -23,5 +26,7 @@ export default defineConfig({
 
   adapter: cloudflare({
     imageService: "compile",
-  })
+  }),
+
+  integrations: [react()]
 });

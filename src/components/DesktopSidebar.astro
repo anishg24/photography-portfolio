@@ -8,6 +8,7 @@ const { sortedFolders, totalPhotos } = Astro.props;
 ---
 
 <nav
+    id="desktop-sidebar-nav"
     class="hidden lg:flex lg:w-72 lg:h-screen lg:sticky lg:top-0 p-0 flex-row bg-[var(--color-surface-container-low)] z-50 transition-colors duration-300"
 >
     {/* Left Column: Vertical Marquee Strip */}
@@ -127,29 +128,33 @@ const { sortedFolders, totalPhotos } = Astro.props;
         }
 
         // Smart Active State Progress
-        document.addEventListener("section-progress", ((e: CustomEvent) => {
-            const { sectionId, progress } = e.detail;
+        let lastActiveSectionId: string | null = null;
+        const sidebarNav = document.getElementById('desktop-sidebar-nav');
 
-            // Reset others
-            document.querySelectorAll(".nav-progress-bar").forEach((el) => {
-                const parent = el.closest(".nav-link");
-                if (
-                    parent &&
-                    parent.getAttribute("data-target") !== sectionId
-                ) {
-                    (el as HTMLElement).style.width = "0%";
+        if (sidebarNav) {
+            document.addEventListener("section-progress", ((e: CustomEvent) => {
+                const { sectionId, progress } = e.detail;
+
+                // Reset only the previously active bar — avoids iterating all bars on every event
+                if (lastActiveSectionId && lastActiveSectionId !== sectionId) {
+                    const prevBar = sidebarNav.querySelector(
+                        `.nav-link[data-target="${lastActiveSectionId}"] .nav-progress-bar`,
+                    ) as HTMLElement | null;
+                    if (prevBar) prevBar.style.width = "0%";
                 }
-            });
+                lastActiveSectionId = sectionId;
 
-            // Update active
-            const activeLink = document.querySelector(
-                `.nav-link[data-target="${sectionId}"] .nav-progress-bar`,
-            ) as HTMLElement;
-            if (activeLink) {
-                // Ensure smooth 0-100 fill
-                activeLink.style.width = `${Math.max(0, Math.min(100, progress * 100))}%`;
-            }
-        }) as EventListener);
+                // Update active
+                const activeLink = sidebarNav.querySelector(
+                    `.nav-link[data-target="${sectionId}"] .nav-progress-bar`,
+                ) as HTMLElement;
+                if (activeLink) {
+                    // Ensure smooth 0-100 fill
+                    activeLink.style.width = `${Math.max(0, Math.min(100, progress * 100))}%`;
+                }
+            }) as EventListener);
+        }
+
 
         // Market Status Logic
         function updateMarketStatus() {

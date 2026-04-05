@@ -56,6 +56,7 @@ const { sortedFolders } = Astro.props;
     </div>
 
     <nav
+        id="mobile-header-nav"
         class="overflow-x-auto no-scrollbar bg-[var(--color-surface-container-low)] scroll-smooth mt-2"
     >
         <ul
@@ -85,45 +86,58 @@ const { sortedFolders } = Astro.props;
 </header>
 
 <script>
+    const mobileNav = document.getElementById('mobile-header-nav');
     // Smart Active State Progress for Mobile Header
     let lastActiveSection: string | null = null;
+    let scrollIntoViewScheduled = false;
 
-    document.addEventListener("section-progress", ((e: CustomEvent) => {
-        const { sectionId, progress } = e.detail;
+    if (mobileNav) {
+        document.addEventListener("section-progress", ((e: CustomEvent) => {
+            const { sectionId, progress } = e.detail;
 
-        // Auto-scroll logic if section changed
-        if (lastActiveSection !== sectionId) {
-            lastActiveSection = sectionId;
-            const activeLink = document.querySelector(
-                `.nav-link[data-target="${sectionId}"]`,
-            );
-            if (activeLink) {
-                activeLink.scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest",
-                    inline: "center",
-                });
+            // Auto-scroll nav pill only when section changes, deferred via rAF
+            // so it never interrupts Lenis's own scroll frame.
+            if (lastActiveSection !== sectionId) {
+                const prevSection = lastActiveSection;
+                lastActiveSection = sectionId;
+
+                // Reset the previously active link's bar
+                if (prevSection) {
+                    const prevBar = mobileNav.querySelector(
+                        `.nav-link[data-target="${prevSection}"] .nav-progress-bar`,
+                    ) as HTMLElement | null;
+                    if (prevBar) prevBar.style.width = "0%";
+                }
+
+                // Defer scrollIntoView so it doesn't conflict with Lenis mid-frame
+                if (!scrollIntoViewScheduled) {
+                    scrollIntoViewScheduled = true;
+                    requestAnimationFrame(() => {
+                        const activeLink = mobileNav.querySelector(
+                            `.nav-link[data-target="${sectionId}"]`,
+                        );
+                        if (activeLink) {
+                            activeLink.scrollIntoView({
+                                behavior: "smooth",
+                                block: "nearest",
+                                inline: "center",
+                            });
+                        }
+                        scrollIntoViewScheduled = false;
+                    });
+                }
             }
-        }
 
-        // Update matching mobile links
-        document
-            .querySelectorAll(
+            // Update progress bar for active link only
+            const activeBar = mobileNav.querySelector(
                 `.nav-link[data-target="${sectionId}"] .nav-progress-bar`,
-            )
-            .forEach((el) => {
-                (el as HTMLElement).style.width =
-                    `${Math.max(0, Math.min(100, progress * 100))}%`;
-            });
-
-        // Reset others (handling global reset if Desktop sidebar doesn't cover it)
-        document.querySelectorAll(".nav-progress-bar").forEach((el) => {
-            const link = el.closest(".nav-link");
-            if (link && link.getAttribute("data-target") !== sectionId) {
-                (el as HTMLElement).style.width = "0%";
+            ) as HTMLElement | null;
+            if (activeBar) {
+                activeBar.style.width = `${Math.max(0, Math.min(100, progress * 100))}%`;
             }
-        });
-    }) as EventListener);
+        }) as EventListener);
+    }
+
 </script>
 
 <style>
