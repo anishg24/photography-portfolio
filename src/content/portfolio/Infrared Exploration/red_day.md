@@ -1,0 +1,12 @@
+---
+image: ./red_day.jpg
+title: red_day
+date: '2026-03-30'
+camera: ILCE-6500
+lens: E 35mm F1.8 OSS
+aperture: f/11
+shutter: 1/200
+iso: '200'
+---
+
+In this surreal tableau, twilight dances on the edge of reality, where a vivid crimson tree reaches for the deep, inky sky. The contrasts are striking—the fiery foliage ignites the night, holding court against the cool, mysterious backdrop. Shadows weave through the branches, whispering secrets of dusk, while an indifferent power pole stands sentinel, its stark lines cut through the atmospheric haze. There’s a sense of anticipation in the air, as if the world is holding its breath, caught between the fervor of vibrant life and the tranquil embrace of the approaching night.

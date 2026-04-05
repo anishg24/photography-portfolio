@@ -8,7 +8,8 @@
     "preview": "wrangler pages dev ./dist",
     "deploy": "pnpm run build && npx wrangler pages deploy ./dist",
     "astro": "astro",
-    "enrich": "node scripts/enrich.js"
+    "enrich": "node scripts/enrich.js",
+    "rename": "node scripts/rename.js"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
