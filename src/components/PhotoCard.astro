@@ -74,15 +74,15 @@ const optimizedLink = await getImage({
         data-pswp-shutter={shutter}
         data-pswp-lens={lens}
         data-pswp-focal-length={focalLen}
-        class="block bg-neutral-900 border border-neutral-800 transition-colors duration-300 sharp relative overflow-hidden cursor-crosshair photo-card-link"
+        class="block bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/15 transition-colors duration-300 sharp relative overflow-hidden cursor-crosshair photo-card-link"
     >
         {/* Main Image */}
         <div class="overflow-hidden relative z-0">
             <StaticImage
                 src={url}
                 alt={key}
-                class="w-full h-auto block transition-opacity duration-300"
-                imgClass="object-cover filter grayscale-0 contrast-110"
+                class="w-full h-auto block transition-all duration-500 transform group-hover:scale-[1.02]"
+                imgClass="object-cover contrast-[1.15]"
                 loading="lazy"
                 width={width}
                 height={height}
@@ -103,7 +103,7 @@ const optimizedLink = await getImage({
 
     {/* Loupe Container - Outside Link */}
     <div
-        class="loupe-container fixed w-64 h-64 rounded-full border-2 border-[var(--color-trust)] shadow-2xl overflow-hidden pointer-events-none z-[100] hidden lg:block bg-black"
+        class="loupe-container fixed w-64 h-64 sharp border-2 border-[var(--color-primary-container)] shadow-ambient overflow-hidden pointer-events-none z-[100] hidden lg:block bg-[var(--color-surface)]"
         style="display: none; transform: translate(-50%, -50%);"
     >
         <img

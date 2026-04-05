@@ -2,29 +2,35 @@
 
 @theme {
     /* Fonts */
-    --font-sans: "Inter", sans-serif;
+    --font-sans: "Manrope", sans-serif;
     --font-serif: "Playfair Display", serif;
     --font-mono: "JetBrains Mono", monospace;
 
-    /* Colors - Obsidian Velvet Palette */
-    --color-obsidian: #050505;
-    /* Deepest black for main content/photo background */
-    --color-matte: #09090B;
-    /* Rich, slightly lighter black for UI areas (Sidebar) */
-    --color-structural: #1F1F22;
-    /* Subtle separation borders */
-    --color-flash: #E4E4E7;
-    /* Primary Text (Zinc-200) - Softened from pure white */
-    --color-steel: #71717A;
-    /* Secondary Text (Zinc-500) - Muted */
-    --color-trust: #FAFAFA;
-    /* Accent (Zinc-50) - Monochrome "Highlight" instead of Blue */
+    /* Colors - The Kinetic Engineer Palette */
+    --color-surface-container-lowest: #000000;
+    --color-surface-container-low: #131313;
+    --color-surface-container-high: #201f1f;
+    --color-surface-container-highest: #262626;
+    --color-surface: #0e0e0e;
+    --color-primary: #f4ffc8;
+    --color-primary-container: #cffc00;
+    --color-on-surface: #ffffff;
+    --color-on-surface-variant: #adaaaa;
+    --color-outline: #767575;
+    --color-outline-variant: #484847;
 
+    /* Old mappings to avoid breaking everything before component updates */
+    --color-obsidian: var(--color-surface);
+    --color-matte: var(--color-surface-container-low);
+    --color-structural: var(--color-surface-container-high);
+    --color-flash: var(--color-on-surface);
+    --color-steel: var(--color-outline);
+    --color-trust: var(--color-on-surface-variant);
 }
 
 ::selection {
-    background-color: #3F3F46;
-    color: #FFFFFF;
+    background-color: var(--color-primary-container);
+    color: var(--color-surface);
 }
 
 html.lenis,
@@ -50,27 +56,27 @@ html.lenis body {
 
 /* Base Styles */
 body {
-    background-color: var(--color-obsidian);
-    color: var(--color-flash);
+    background-color: var(--color-surface);
+    color: var(--color-on-surface-variant);
     font-family: var(--font-sans);
 }
 
-/* Scrollbar styling for the 'financial terminal' look */
+/* Scrollbar styling for the new look */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--color-matte);
+    background: var(--color-surface-container-lowest);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-structural);
+    background: var(--color-surface-container-highest);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-trust);
+    background: var(--color-primary-container);
 }
 
 /* Utility for sharp edges */
@@ -78,7 +84,19 @@ body {
     border-radius: 0 !important;
 }
 
-/* Animations for Ledger HUD */
+/* Glassmorphism utility */
+.glass-panel {
+    background-color: rgba(14, 14, 14, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+/* Ambient Shadows for modals/floating elements */
+.shadow-ambient {
+    box-shadow: 0 0 80px rgba(255, 255, 255, 0.05);
+}
+
+/* Animations for Leger HUD */
 @keyframes drawHorizontal {
     from {
         transform: scaleX(0);
@@ -106,5 +124,4 @@ body {
 .animate-draw-v {
     animation: drawVertical 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     animation-delay: 0.1s;
-    /* Slight delay for vertical */
 }

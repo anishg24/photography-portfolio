@@ -21,11 +21,11 @@ const { make, model, iso, fNumber, shutter, fileName, scrambledFileName } =
         {/* Top Left Hairline */}
         <div class="relative pl-2 pt-2">
             <div
-                class="absolute top-0 left-0 w-8 h-[1px] bg-[var(--color-trust)] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+                class="absolute top-0 left-0 w-8 h-[1px] bg-[var(--color-primary-container)] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
             >
             </div>
             <div
-                class="absolute top-0 left-0 w-[1px] h-8 bg-[var(--color-trust)] origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100 ease-out"
+                class="absolute top-0 left-0 w-[1px] h-8 bg-[var(--color-primary-container)] origin-top scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100 ease-out"
             >
             </div>
             <span
@@ -38,11 +38,11 @@ const { make, model, iso, fNumber, shutter, fileName, scrambledFileName } =
         {/* Top Right Info */}
         <div class="text-right">
             <span
-                class="block text-[10px] font-mono text-[var(--color-trust)] tracking-widest"
+                class="block text-[10px] font-mono text-[var(--color-primary-container)] tracking-[0.2em]"
                 >{make}</span
             >
             <span
-                class="block text-[10px] font-sans font-bold text-white tracking-wide"
+                class="block text-[10px] font-mono font-bold text-[var(--color-on-surface)] tracking-widest uppercase"
                 >{model}</span
             >
         </div>
@@ -51,29 +51,29 @@ const { make, model, iso, fNumber, shutter, fileName, scrambledFileName } =
     {/* Bottom Row */}
     <div class="flex justify-between items-end">
         {/* Tech Specs */}
-        <div class="text-[10px] font-mono space-y-1 text-neutral-300">
-            <div class="flex gap-3">
-                <span class="text-neutral-500 w-12">ISO</span>
-                <span class="text-[var(--color-flash)]">{iso || "RAW"}</span>
+        <div class="text-[10px] font-mono space-y-1 text-[var(--color-on-surface-variant)] uppercase">
+            <div class="flex gap-3 justify-end items-center">
+                <span class="text-opacity-60 text-[var(--color-on-surface-variant)] w-12 text-right">ISO</span>
+                <span class="text-[var(--color-primary)] w-12">{iso || "RAW"}</span>
             </div>
-            <div class="flex gap-3">
-                <span class="text-neutral-500 w-12">APERTURE</span>
-                <span class="text-[var(--color-flash)]">f/{fNumber}</span>
+            <div class="flex gap-3 justify-end items-center">
+                <span class="text-opacity-60 text-[var(--color-on-surface-variant)] w-12 text-right">APERT</span>
+                <span class="text-[var(--color-primary)] w-12">f/{fNumber}</span>
             </div>
-            <div class="flex gap-3">
-                <span class="text-neutral-500 w-12">SHUTTER</span>
-                <span class="text-[var(--color-flash)]">{shutter}</span>
+            <div class="flex gap-3 justify-end items-center">
+                <span class="text-opacity-60 text-[var(--color-on-surface-variant)] w-12 text-right">SHUTTER</span>
+                <span class="text-[var(--color-primary)] w-12">{shutter}</span>
             </div>
         </div>
 
         {/* Bottom Right Hairline */}
         <div class="relative pr-2 pb-2">
             <div
-                class="absolute bottom-0 right-0 w-8 h-[1px] bg-[var(--color-trust)] origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
+                class="absolute bottom-0 right-0 w-8 h-[1px] bg-[var(--color-primary-container)] origin-right scale-x-0 group-hover:scale-x-100 transition-transform duration-500 ease-out"
             >
             </div>
             <div
-                class="absolute bottom-0 right-0 w-[1px] h-8 bg-[var(--color-trust)] origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100 ease-out"
+                class="absolute bottom-0 right-0 w-[1px] h-8 bg-[var(--color-primary-container)] origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 delay-100 ease-out"
             >
             </div>
         </div>

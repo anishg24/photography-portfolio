@@ -7,7 +7,7 @@ const { sortedFolders } = Astro.props;
 ---
 
 <header
-    class="lg:hidden sticky top-0 z-50 bg-[var(--color-obsidian)] border-b border-[var(--color-structural)]"
+    class="lg:hidden sticky top-0 z-50 bg-[var(--color-surface-container-lowest)]"
 >
     <div class="p-6 pb-2 overflow-hidden relative w-full">
         {/* Marquee Wrapper */}
@@ -17,17 +17,17 @@ const { sortedFolders } = Astro.props;
             >
                 {/* Content duplicated for seamless loop */}
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
                 >
                     Anish Photography
                 </span>
@@ -37,17 +37,17 @@ const { sortedFolders } = Astro.props;
             >
                 {/* Duplicate container for seamless loop */}
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
                 >
                     Anish Photography
                 </span>
                 <span
-                    class="text-2xl font-serif font-bold tracking-tight text-neutral-700 uppercase mx-12"
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
                 >
                     Anish Photography
                 </span>
@@ -56,10 +56,10 @@ const { sortedFolders } = Astro.props;
     </div>
 
     <nav
-        class="overflow-x-auto no-scrollbar border-t border-[var(--color-structural)] bg-[var(--color-obsidian)] scroll-smooth"
+        class="overflow-x-auto no-scrollbar bg-[var(--color-surface-container-low)] scroll-smooth mt-2"
     >
         <ul
-            class="inline-flex min-w-full justify-center whitespace-nowrap px-6 py-3 space-x-8"
+            class="inline-flex min-w-full justify-center whitespace-nowrap px-6 py-4 space-x-12"
         >
             {
                 sortedFolders.map((folder) => {
@@ -68,11 +68,11 @@ const { sortedFolders } = Astro.props;
                         <li>
                             <a
                                 href={`#${slug}`}
-                                class="nav-link block text-[10px] font-mono uppercase tracking-widest text-neutral-500 transition-colors duration-200 relative overflow-hidden group px-2 py-1"
+                                class="nav-link block text-[10px] font-mono uppercase tracking-widest text-[var(--color-on-surface-variant)] transition-colors duration-200 relative overflow-hidden group px-2 py-1"
                                 data-target={slug}
                             >
                                 <span class="absolute left-0 top-0 bottom-0 w-full opacity-10 pointer-events-none z-0">
-                                    <span class="block h-full bg-[var(--color-trust)] w-0 transition-all duration-100 ease-linear nav-progress-bar" />
+                                    <span class="block h-full bg-[var(--color-primary-container)] w-0 transition-all duration-100 ease-linear nav-progress-bar" />
                                 </span>
                                 <span class="relative z-10">{folder}</span>
                             </a>
