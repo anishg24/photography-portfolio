@@ -1,0 +1,26 @@
+---
+import SidebarMarquee from "./SidebarMarquee.astro";
+import SidebarNav from "./SidebarNav.astro";
+import SidebarStatus from "./SidebarStatus.astro";
+
+interface Props {
+    sortedFolders: string[];
+    totalPhotos: number;
+}
+
+const { sortedFolders, totalPhotos } = Astro.props;
+---
+
+<nav
+    id="desktop-sidebar-nav"
+    class="hidden lg:flex lg:w-72 lg:h-screen lg:sticky lg:top-0 p-0 flex-row bg-[var(--color-surface-container-low)] z-50 transition-colors duration-300"
+>
+    {/* Left Column: Vertical Marquee Strip */}
+    <SidebarMarquee />
+
+    {/* Right Column: Main Content */}
+    <div class="flex-1 flex flex-col p-8 relative">
+        <SidebarNav sortedFolders={sortedFolders} />
+        <SidebarStatus totalPhotos={totalPhotos} />
+    </div>
+</nav>

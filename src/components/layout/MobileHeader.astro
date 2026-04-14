@@ -1,0 +1,165 @@
+---
+interface Props {
+    sortedFolders: string[];
+}
+
+const { sortedFolders } = Astro.props;
+---
+
+<header
+    class="lg:hidden sticky top-0 z-50 bg-[var(--color-surface-container-lowest)]"
+>
+    <div class="p-6 pb-2 overflow-hidden relative w-full">
+        {/* Marquee Wrapper */}
+        <div class="flex overflow-hidden w-full">
+            <div
+                class="animate-marquee-ltr flex whitespace-nowrap min-w-full shrink-0 items-center justify-around"
+            >
+                {/* Content duplicated for seamless loop */}
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
+                >
+                    Anish Photography
+                </span>
+            </div>
+            <div
+                class="animate-marquee-ltr flex whitespace-nowrap min-w-full shrink-0 items-center justify-around"
+            >
+                {/* Duplicate container for seamless loop */}
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
+                >
+                    Anish Photography
+                </span>
+                <span
+                    class="text-2xl font-serif font-bold tracking-tight text-[var(--color-surface-container-highest)] uppercase mx-12"
+                >
+                    Anish Photography
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <nav
+        id="mobile-header-nav"
+        class="overflow-x-auto no-scrollbar bg-[var(--color-surface-container-low)] scroll-smooth mt-2"
+    >
+        <ul
+            class="inline-flex min-w-full justify-center whitespace-nowrap px-6 py-4 space-x-12"
+        >
+            {
+                sortedFolders.map((folder) => {
+                    const slug = folder.toLowerCase().replace(/\s+/g, "-");
+                    return (
+                        <li>
+                            <a
+                                href={`#${slug}`}
+                                class="nav-link block text-[10px] font-mono uppercase tracking-widest text-[var(--color-on-surface-variant)] transition-colors duration-200 relative overflow-hidden group px-2 py-1"
+                                data-target={slug}
+                            >
+                                <span class="absolute left-0 top-0 bottom-0 w-full opacity-10 pointer-events-none z-0">
+                                    <span class="block h-full bg-[var(--color-primary-container)] w-0 transition-all duration-100 ease-linear nav-progress-bar" />
+                                </span>
+                                <span class="relative z-10">{folder}</span>
+                            </a>
+                        </li>
+                    );
+                })
+            }
+        </ul>
+    </nav>
+</header>
+
+<script>
+    const mobileNav = document.getElementById('mobile-header-nav');
+    // Smart Active State Progress for Mobile Header
+    let lastActiveSection: string | null = null;
+    let scrollIntoViewScheduled = false;
+
+    if (mobileNav) {
+        document.addEventListener("section-progress", ((e: CustomEvent) => {
+            const { sectionId, progress } = e.detail;
+
+            // Auto-scroll nav pill only when section changes, deferred via rAF
+            // so it never interrupts Lenis's own scroll frame.
+            if (lastActiveSection !== sectionId) {
+                const prevSection = lastActiveSection;
+                lastActiveSection = sectionId;
+
+                // Reset the previously active link's bar
+                if (prevSection) {
+                    const prevBar = mobileNav.querySelector(
+                        `.nav-link[data-target="${prevSection}"] .nav-progress-bar`,
+                    ) as HTMLElement | null;
+                    if (prevBar) prevBar.style.width = "0%";
+                }
+
+                // Defer scrollIntoView so it doesn't conflict with Lenis mid-frame
+                if (!scrollIntoViewScheduled) {
+                    scrollIntoViewScheduled = true;
+                    requestAnimationFrame(() => {
+                        const activeLink = mobileNav.querySelector(
+                            `.nav-link[data-target="${sectionId}"]`,
+                        );
+                        if (activeLink) {
+                            activeLink.scrollIntoView({
+                                behavior: "smooth",
+                                block: "nearest",
+                                inline: "center",
+                            });
+                        }
+                        scrollIntoViewScheduled = false;
+                    });
+                }
+            }
+
+            // Update progress bar for active link only
+            const activeBar = mobileNav.querySelector(
+                `.nav-link[data-target="${sectionId}"] .nav-progress-bar`,
+            ) as HTMLElement | null;
+            if (activeBar) {
+                activeBar.style.width = `${Math.max(0, Math.min(100, progress * 100))}%`;
+            }
+        }) as EventListener);
+    }
+
+</script>
+
+<style>
+    /* Ticker Nav hiding scrollbar */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    @keyframes scrollLeftToRight {
+        0% {
+            transform: translateX(-100%);
+        }
+        100% {
+            transform: translateX(0%);
+        }
+    }
+
+    .animate-marquee-ltr {
+        animation: scrollLeftToRight 40s linear infinite;
+    }
+</style>

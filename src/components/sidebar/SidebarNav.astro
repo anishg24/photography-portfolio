@@ -1,0 +1,66 @@
+---
+interface Props {
+    sortedFolders: string[];
+}
+
+const { sortedFolders } = Astro.props;
+---
+
+<div class="relative pl-0 mt-8">
+    {/* Blue Marker Indicator (Sharp) */}
+    <div
+        id="active-pill"
+        class="absolute -left-[1px] w-[3px] bg-[var(--color-primary-container)] transition-all duration-300 ease-out opacity-0 z-10 hidden lg:block"
+        style="height: 0px; top: 0px;"
+    >
+    </div>
+
+    <ul class="space-y-4 relative z-0">
+        {
+            sortedFolders.map((folder) => {
+                const slug = folder.toLowerCase().replace(/\s+/g, "-");
+                return (
+                    <li>
+                        <a
+                            href={`#${slug}`}
+                            class="nav-link block pl-6 text-[var(--color-on-surface-variant)] hover:text-[var(--color-primary)] transition-colors duration-200 text-xs font-mono uppercase tracking-widest relative group flex items-center h-8"
+                            data-target={slug}
+                        >
+                            <span class="absolute left-0 top-0 bottom-0 w-full opacity-10 pointer-events-none z-0">
+                                <span class="block h-full bg-[var(--color-primary-container)] w-0 transition-all duration-100 ease-linear nav-progress-bar" />
+                            </span>
+                            <span class="relative z-10">{folder}</span>
+                        </a>
+                    </li>
+                );
+            })
+        }
+    </ul>
+</div>
+
+<script>
+    // Smart Active State Progress
+    let lastActiveSectionId: string | null = null;
+    const sidebarNav = document.getElementById('desktop-sidebar-nav');
+
+    if (sidebarNav) {
+        document.addEventListener("section-progress", ((e: CustomEvent) => {
+            const { sectionId, progress } = e.detail;
+
+            if (lastActiveSectionId && lastActiveSectionId !== sectionId) {
+                const prevBar = sidebarNav.querySelector(
+                    `.nav-link[data-target="${lastActiveSectionId}"] .nav-progress-bar`,
+                ) as HTMLElement | null;
+                if (prevBar) prevBar.style.width = "0%";
+            }
+            lastActiveSectionId = sectionId;
+
+            const activeLink = sidebarNav.querySelector(
+                `.nav-link[data-target="${sectionId}"] .nav-progress-bar`,
+            ) as HTMLElement;
+            if (activeLink) {
+                activeLink.style.width = `${Math.max(0, Math.min(100, progress * 100))}%`;
+            }
+        }) as EventListener);
+    }
+</script>

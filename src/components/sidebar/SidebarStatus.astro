@@ -1,0 +1,89 @@
+---
+interface Props {
+    totalPhotos: number;
+}
+
+const { totalPhotos } = Astro.props;
+---
+
+<div class="mt-auto pt-6">
+    <div
+        class="flex justify-between items-center text-[10px] font-mono text-[var(--color-on-surface-variant)] uppercase tracking-wider"
+    >
+        <span>TOTAL HOLDINGS</span>
+        <span id="total-holdings-count" data-target={totalPhotos} class="text-[var(--color-on-surface)]"
+            >0</span
+        >
+    </div>
+    <div
+        class="flex justify-between items-center text-[10px] font-mono uppercase tracking-wider mt-1"
+    >
+        <span class="text-[var(--color-primary)]">SYSTEM STATUS</span>
+        <span id="market-status" class="text-[var(--color-primary-container)]"
+            >LIVE</span
+        >
+    </div>
+</div>
+
+<script>
+    // Number Count Animation
+    const counter = document.getElementById("total-holdings-count");
+    if (counter) {
+        const target = parseInt(counter.getAttribute("data-target") || "0");
+        const duration = 2000; // 2 seconds
+        const startTime = performance.now();
+
+        const updateCount = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Ease out quart
+            const ease = 1 - Math.pow(1 - progress, 4);
+
+            const current = Math.floor(target * ease);
+            counter.innerText = current.toString();
+
+            if (progress < 1) {
+                requestAnimationFrame(updateCount);
+            } else {
+                counter.innerText = target.toString();
+            }
+        };
+
+        requestAnimationFrame(updateCount);
+    }
+
+    // Market Status Logic
+    function updateMarketStatus() {
+        const statusElement = document.getElementById("market-status");
+        if (!statusElement) return;
+
+        const now = new Date();
+        const nyTime = new Date(
+            now.toLocaleString("en-US", { timeZone: "America/New_York" }),
+        );
+
+        const day = nyTime.getDay();
+        const hour = nyTime.getHours();
+        const minute = nyTime.getMinutes();
+
+        const isWeekend = day === 0 || day === 6;
+        const isMarketHours =
+            (hour > 9 && hour < 16) || (hour === 9 && minute >= 30);
+
+        const isOpen = !isWeekend && isMarketHours;
+
+        statusElement.innerText = isOpen ? "LIVE" : "OFFLINE";
+
+        if (isOpen) {
+            statusElement.classList.remove("text-neutral-500");
+            statusElement.classList.add("text-[var(--color-trust)]");
+        } else {
+            statusElement.classList.remove("text-[var(--color-trust)]");
+            statusElement.classList.add("text-neutral-500");
+        }
+    }
+
+    updateMarketStatus();
+    setInterval(updateMarketStatus, 60000);
+</script>

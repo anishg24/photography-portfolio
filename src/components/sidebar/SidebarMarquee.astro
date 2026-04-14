@@ -1,0 +1,53 @@
+---
+---
+<div
+    class="w-12 h-full overflow-hidden relative flex flex-col justify-center items-center bg-[var(--color-surface-container-lowest)]"
+>
+    <div class="h-full overflow-hidden w-full relative">
+        <div
+            class="absolute inset-0 flex flex-col items-center animate-vertical-marquee"
+        >
+            {/* Group 1 */}
+            <div class="flex flex-col gap-0 shrink-0 items-center">
+                {
+                    Array.from({ length: 12 }).map(() => (
+                        <span class="vertical-text text-3xl font-mono font-bold tracking-[0.2em] text-[var(--color-surface-container-highest)] hover:text-[var(--color-primary)] transition-colors duration-300 whitespace-nowrap cursor-default select-none py-12">
+                            ANISH PHOTOGRAPHY&nbsp;&nbsp;
+                        </span>
+                    ))
+                }
+            </div>
+            {/* Group 2 (Duplicate for loop) */}
+            <div class="flex flex-col gap-0 shrink-0 items-center">
+                {
+                    Array.from({ length: 12 }).map(() => (
+                        <span class="vertical-text text-3xl font-mono font-bold tracking-[0.2em] text-[var(--color-surface-container-highest)] hover:text-[var(--color-primary)] transition-colors duration-300 whitespace-nowrap cursor-default select-none py-12">
+                            ANISH PHOTOGRAPHY&nbsp;&nbsp;
+                        </span>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .vertical-text {
+        writing-mode: vertical-lr;
+        transform: rotate(180deg);
+        text-orientation: mixed;
+    }
+
+    .animate-vertical-marquee {
+        animation: scrollUp 40s linear infinite;
+    }
+
+    @keyframes scrollUp {
+        from {
+            transform: translateY(0);
+        }
+        to {
+            transform: translateY(-50%);
+        }
+    }
+</style>
