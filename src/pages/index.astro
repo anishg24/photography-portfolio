@@ -57,8 +57,12 @@ for (const folder of sortedFolders) {
         groupedPhotos[folder].map(async (photo) => {
             const thumbnail = await getImage({ src: photo.data.image, width: 1200, format: 'avif', quality: 85 });
             const full = await getImage({ src: photo.data.image, width: 3000, format: 'avif', quality: 95 });
+            
+            // Exclude 'body' to prevent it from being serialized into the initial HTML island props
+            const { body, ...restOfPhoto } = photo;
+            
             return {
-                ...photo,
+                ...restOfPhoto,
                 thumbnailUrl: thumbnail.src,
                 fullUrl: full.src,
             };

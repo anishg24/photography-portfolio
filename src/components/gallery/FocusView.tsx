@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import type { Photo } from "../../types/photo";
 import WaitXIcon from "../icons/WaitXIcon";
 
@@ -8,6 +9,61 @@ interface FocusViewProps {
 }
 
 export default function FocusView({ photo, onClose }: FocusViewProps) {
+    /** Tracks whether the full-res image has finished loading. */
+    const [isFullResReady, setIsFullResReady] = useState(false);
+    /** Ref to the single visible <img> element. */
+    const imgRef = useRef<HTMLImageElement>(null);
+
+    const [bodyText, setBodyText] = useState<string | null>(photo.body || null);
+    const [isLoadingBody, setIsLoadingBody] = useState(!photo.body);
+
+    useEffect(() => {
+        if (!bodyText && isLoadingBody) {
+            fetch(`/api/photo/${photo.id}.json`)
+                .then(res => res.json())
+                .then(data => {
+                    setBodyText(data.body);
+                    setIsLoadingBody(false);
+                })
+                .catch(err => {
+                    console.error("Failed to load photo description", err);
+                    setIsLoadingBody(false);
+                });
+        }
+    }, [photo.id, bodyText, isLoadingBody]);
+
+    const thumbnailSrc = photo.thumbnailUrl || photo.data.image.src;
+    const fullSrc = photo.fullUrl || photo.data.image.src;
+
+    /**
+     * Preload the full-res image in the background using an off-screen Image
+     * object. Once loaded, swap the visible element's src so there is zero
+     * layout shift — the same element simply sharpens in place.
+     */
+    useEffect(() => {
+        // If thumbnail and full are identical, nothing to preload.
+        if (thumbnailSrc === fullSrc) {
+            setIsFullResReady(true);
+            return;
+        }
+
+        const preloader = new Image();
+        preloader.src = fullSrc;
+
+        preloader.onload = () => {
+            // Swap the visible img's src to the now-cached full-res copy.
+            if (imgRef.current) {
+                imgRef.current.src = fullSrc;
+            }
+            setIsFullResReady(true);
+        };
+
+        return () => {
+            // Cancel any in-flight decode if the component unmounts early.
+            preloader.onload = null;
+        };
+    }, [thumbnailSrc, fullSrc]);
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -40,10 +96,21 @@ export default function FocusView({ photo, onClose }: FocusViewProps) {
                         className="relative z-50 flex-shrink-0 w-full lg:w-[60%] flex items-center justify-center lg:items-start lg:p-4"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
+                        {/*
+                          Single <img> element — starts with the cached thumbnail
+                          and a subtle blur. Once the full-res finishes preloading,
+                          its src is swapped in-place and the blur fades away like
+                          a lens pulling into focus.
+                        */}
                         <img
-                            src={photo.fullUrl || photo.data.image.src}
+                            ref={imgRef}
+                            src={thumbnailSrc}
                             alt={photo.data.title}
                             className="max-h-[70vh] lg:max-h-[85vh] max-w-full object-contain shadow-2xl rounded-sm"
+                            style={{
+                                filter: isFullResReady ? 'blur(0px)' : 'blur(6px)',
+                                transition: 'filter 0.6s ease-out',
+                            }}
                             onClick={(e) => e.stopPropagation()}
                         />
                     </motion.div>
@@ -67,8 +134,23 @@ export default function FocusView({ photo, onClose }: FocusViewProps) {
                                 {photo.data.iso && <div><span className="text-neutral-600 block mb-1">ISO</span>{photo.data.iso}</div>}
                             </div>
 
-                            <div className="text-sm leading-relaxed text-neutral-300 font-sans mt-8 max-w-md relative z-10">
-                                {photo.body}
+                            <div className="text-sm leading-relaxed text-neutral-300 font-sans mt-8 max-w-md relative z-10 min-h-[100px]">
+                                {isLoadingBody ? (
+                                    <div className="animate-pulse flex flex-col gap-2 opacity-50">
+                                        <div className="h-3 bg-neutral-700/50 rounded w-3/4"></div>
+                                        <div className="h-3 bg-neutral-700/50 rounded w-full"></div>
+                                        <div className="h-3 bg-neutral-700/50 rounded w-5/6"></div>
+                                        <div className="h-3 bg-neutral-700/50 rounded w-4/5"></div>
+                                    </div>
+                                ) : (
+                                    <motion.div 
+                                        initial={{ opacity: 0 }} 
+                                        animate={{ opacity: 1 }} 
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        {bodyText}
+                                    </motion.div>
+                                )}
                             </div>
                         </div>
                     </motion.div>
@@ -77,3 +159,4 @@ export default function FocusView({ photo, onClose }: FocusViewProps) {
         </motion.div>
     );
 }
+
