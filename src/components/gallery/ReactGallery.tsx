@@ -86,14 +86,21 @@ export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGall
                         <motion.section
                             key={folder}
                             id={sectionId}
-                            className="scroll-mt-32 lg:scroll-mt-24 section-folder"
+                            className="scroll-mt-32 lg:scroll-mt-24 section-folder relative"
                             style={{ contentVisibility: 'auto', containIntrinsicSize: '0 800px' }}
                             initial="hidden"
                             whileInView="show"
                             viewport={{ once: true, margin: "-100px" }}
                             variants={containerVariants}
                         >
-                            <div className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end w-full">
+                            {/* Vertical Section Marker */}
+                            <div className="absolute -left-4 lg:-left-20 top-0 h-full pointer-events-none hidden sm:flex items-start pt-2 select-none overflow-hidden">
+                                <span className="[writing-mode:vertical-lr] rotate-180 text-8xl lg:text-[12rem] font-mono font-black tracking-tighter text-[var(--color-on-surface)] opacity-[0.03] leading-none">
+                                    {`//SEC_${(folderIdx + 1).toString().padStart(2, '0')}`}
+                                </span>
+                            </div>
+
+                            <div className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end w-full relative z-10">
                                 <div className="md:w-1/2">
                                     <h2 className="text-4xl lg:text-7xl font-serif text-[var(--color-on-surface)] font-bold tracking-tight uppercase leading-none">
                                         {folder}
