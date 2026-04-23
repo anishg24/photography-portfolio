@@ -129,7 +129,21 @@ async function start() {
         return;
     }
 
+    let useAI = false;
+    if (process.argv.includes("--ai")) {
+        if (!OPENROUTER_API_KEY) {
+            console.warn("Error: --ai flag passed but OPENROUTER_API_KEY is not set in .env!");
+            process.exit(1);
+        }
+        useAI = true;
+    }
+
     console.log(`Found ${allImages.length} image files. Checking for missing metadata...`);
+    if (useAI) {
+        console.log("AI Enrichment: ENABLED (via OpenRouter)");
+    } else {
+        console.log("AI Enrichment: DISABLED (pass --ai to enable title/story generation)");
+    }
 
     let concurrencyStr = "4";
     const jIndex = process.argv.indexOf("-j");
@@ -159,8 +173,11 @@ async function start() {
                 mdRaw = await fs.readFile(mdPath, "utf-8");
                 parsed = matter(mdRaw);
                 if (parsed.content && parsed.content.trim() !== "") {
-                    hasStory = true;
-                    existingStory = parsed.content.trim();
+                    // Check if it's the failure fallback message
+                    if (parsed.content.trim() !== "Failed to fetch story.") {
+                        hasStory = true;
+                        existingStory = parsed.content.trim();
+                    }
                 }
             } catch (e) {
                 // File does not exist yet! We will create it.
@@ -187,33 +204,49 @@ async function start() {
             console.log(`[${baseName}] -> Extracting EXIF...`);
             const meta = await extractMetadata(imageBuffer);
             
-            console.log(`[${baseName}] -> Fetching Enrichment from OpenRouter...`);
-            const base64Image = imageBuffer.toString("base64");
-            const enrichment = await getEnrichmentData(base64Image, baseName, existingStory);
+            let finalTitle = baseName;
+            let finalStory = "";
+            let generatedFileName = baseName;
 
-            let finalTitle = enrichment.title;
-            let finalStory = enrichment.story;
+            if (useAI && (!hasStory || needsRename)) {
+                console.log(`[${baseName}] -> Fetching Enrichment from OpenRouter...`);
+                const base64Image = imageBuffer.toString("base64");
+                const enrichment = await getEnrichmentData(base64Image, baseName, existingStory);
+                
+                finalTitle = enrichment.title;
+                finalStory = enrichment.story;
 
-            // If we already had a story, preserve it unless it was a failure
-            if (hasStory && existingStory) {
+                if (needsRename) {
+                    generatedFileName = enrichment.title.toLowerCase().replace(/[\s\W]+/g, '_');
+                }
+            } else {
+                if (hasStory) {
+                    finalStory = existingStory;
+                    finalTitle = parsed.data.title || baseName;
+                }
+                
+                if (needsRename) {
+                    // Fallback rename if AI is off but file needs rename
+                    generatedFileName = `photo_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                }
+            }
+
+            // If we already had a story, preserve it unless it was completely replaced by AI
+            if (hasStory && existingStory && !useAI) {
                 finalStory = existingStory;
             }
 
-            let finalBaseName = baseName;
-            let finalImageFileName = fileName;
+            let finalImageFileName = `${generatedFileName}${ext}`;
 
             if (needsRename) {
-                // Generate underscore filename from spaced title
-                finalBaseName = enrichment.title.toLowerCase().replace(/[\s\W]+/g, '_');
-                finalImageFileName = finalBaseName + ext;
-                console.log(`[RENAME] ${baseName} -> ${finalBaseName}`);
+                console.log(`[RENAME] ${baseName} -> ${generatedFileName}`);
             }
 
             const newData = { 
                 ...parsed.data, 
                 ...meta, 
                 image: `./${finalImageFileName}`,
-                title: finalTitle // Spaced title for frontmatter
+                title: finalTitle 
             };
             
             // Remove undefined keys
@@ -221,7 +254,7 @@ async function start() {
 
             const newMdContent = matter.stringify("\n" + finalStory + "\n", newData);
             
-            const finalMdPath = path.join(dir, `${finalBaseName}.md`);
+            const finalMdPath = path.join(dir, `${generatedFileName}.md`);
             const finalImagePath = path.join(dir, finalImageFileName);
 
             // Write the new or updated MD file
@@ -240,7 +273,7 @@ async function start() {
                 }
             }
 
-            console.log(`[DONE] Finished ${finalBaseName}`);
+            console.log(`[DONE] Finished ${generatedFileName}`);
             
             // Add a 500ms delay to avoid rate limiting
             await new Promise(r => setTimeout(r, 500));
