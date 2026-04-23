@@ -111,7 +111,7 @@ export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGall
                                         [ ID: {folderId} ]
                                     </p>
                                     {timeStr && (
-                                        <p className="text-xs text-[#adaaaa] font-mono tracking-widest mt-2 bg-[#0e0e0e]/80 inline-block px-1">
+                                        <p className="text-xs text-[#adaaaa] font-mono tracking-widest mt-2 bg-[var(--color-surface)]/80 inline-block px-1">
                                             {timeStr}
                                         </p>
                                     )}

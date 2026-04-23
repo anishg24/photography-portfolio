@@ -105,7 +105,7 @@ const PhotoCard = React.memo(({ photo, isFirstFolder, pIdx, setFocusedPhoto }: P
         >
             <motion.div
                 layoutId={`photo-${photo.id}`}
-                className="relative bg-black overflow-hidden"
+                className="relative bg-[var(--color-surface)] overflow-hidden"
                 whileHover={{ scale: 1.0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
@@ -198,7 +198,7 @@ function DataTicker() {
         }, 75);
         return () => clearInterval(interval);
     }, []);
-    return <div className="text-[#cffc00] text-[10px] font-mono tracking-widest mt-2 bg-[#0e0e0e]/80 inline-block px-1">[{hex}]</div>
+    return <div className="text-[#cffc00] text-[10px] font-mono tracking-widest mt-2 bg-[var(--color-surface)]/80 inline-block px-1">[{hex}]</div>
 }
 
 export default PhotoCard;

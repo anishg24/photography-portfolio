@@ -12,7 +12,7 @@ export default function FragmentedPlaceholder({ naturalWidth, naturalHeight }: {
     const totalBlocks = Math.min(cols * rows, 300);
 
     return (
-        <div className="absolute inset-0 z-0 bg-[#0e0e0e] overflow-hidden">
+        <div className="absolute inset-0 z-0 bg-[var(--color-surface)] overflow-hidden">
             <style>{`
                 @keyframes decryptFlicker {
                     0% { opacity: 0.1; }
