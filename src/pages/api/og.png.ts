@@ -1,6 +1,6 @@
 import { getCollection } from "astro:content";
 import satori from "satori";
-import { Resvg } from "@resvg/resvg-js";
+import { initWasm, Resvg } from "@resvg/resvg-wasm";
 
 export const prerender = false;
 
@@ -218,6 +218,13 @@ export const GET = async ({ request }: { request: Request }) => {
                 return res.arrayBuffer();
             })
         ]);
+
+        // Initialize WASM
+        try {
+            await initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm"));
+        } catch (e) {
+            // May already be initialized in dev mode
+        }
 
 		const svg = await satori(html as any, {
 			width: 1200,
