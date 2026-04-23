@@ -6,6 +6,7 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://photos.govind.cc',
   env: {
     schema: {
       R2_BUCKET_NAME: envField.string({ context: 'server', access: 'secret' }),
