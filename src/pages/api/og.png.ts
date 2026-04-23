@@ -1,16 +1,22 @@
 import { getCollection } from "astro:content";
 import satori from "satori";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
+import fs from "fs/promises";
+import path from "path";
 
-// Cloudflare Workers specific WASM import binding pattern
-import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm?module";
+export const prerender = true;
 
-export const prerender = false;
+const findLocalImage = async (urlPath: string) => {
+    // Satori needs raw bas64 data urls or ArrayBuffers if it cannot directly fetch
+    // During typical Astro SSG, things mapped to `/_astro/file.hash.avif` don't physically exist 
+    // on a live localhost server if we haven't written them out yet.
+    // So we will try to look up the original from the source content map!
+    return null;
+}
 
-export const GET = async ({ request }: { request: Request }) => {
+export const GET = async ({ request, url }: { request: Request, url: URL }) => {
 	try {
-        const url = new URL(request.url);
-        const origin = url.origin;
+        const origin = url.origin || "http://localhost:4321";
 
         const photos = await getCollection("portfolio");
 
@@ -116,17 +122,29 @@ export const GET = async ({ request }: { request: Request }) => {
                                 const imgIndex = i > 4 ? i - 1 : i;
                                 const imgUrlRaw = latestImages[imgIndex];
                                 
-                                // Ensure the image URL is absolute for Satori
-                                let imgUrl = imgUrlRaw;
-                                if (imgUrl && typeof imgUrl === 'string' && imgUrl.startsWith('/')) {
-                                    imgUrl = `${origin}${imgUrl}`;
-                                } else if (imgUrl && typeof imgUrl === 'object') {
-                                    // If Astro provides an object (from local import or image optimization)
-                                    let src = (imgUrl as any).src;
-                                    if (src.startsWith('/')) {
-                                        imgUrl = `${origin}${src}`;
-                                    } else {
-                                        imgUrl = src;
+                                // Instead of letting Satori blindly fetch (which fails on prerender because 
+                                // the image isn't optimized or served locally until post-build),
+                                // we will just pass Satori the actual local base64 data string from the raw image!
+                                
+                                let imgBase64Pattern = imgUrlRaw;
+                                
+                                // If it's a content collection object, that raw file exists in process.cwd().
+                                if (imgUrlRaw && typeof imgUrlRaw === 'object') {
+                                    const rawSrc = (imgUrlRaw as any).src; // something like /_astro/...
+                                    // Satori supports background-image data uris nicely.
+                                    // To make this work dynamically without a complex resolver, we'll try to guess 
+                                    // its source. Actually, Astro exposes the raw OS path in `fsPath` during dev/build!
+                                    const fsPath = (imgUrlRaw as any).fsPath;
+                                    
+                                    if (fsPath) {
+                                        try {
+                                            // Make sure we just use synchronous fs reads for Satori to prevent nested async issues inside Array.map
+                                            const buf = require("fs").readFileSync(fsPath);
+                                            const ext = fsPath.split('.').pop() || 'jpg';
+                                            imgUrl = `data:image/${ext};base64,${buf.toString('base64')}`;
+                                        } catch (e) {
+                                            console.log("Could not read fsPath", fsPath);
+                                        }
                                     }
                                 }
 
@@ -224,13 +242,10 @@ export const GET = async ({ request }: { request: Request }) => {
 
         // Initialize WASM
         try {
-            // Check if Cloudflare gave us the compiled WebAssembly.Module directly via Vite/Wrangler
-            if (resvgWasm && resvgWasm instanceof WebAssembly.Module) {
-                await initWasm(resvgWasm);
-            } else {
-                // Fallback for local/node environments that allow runtime fetching
-                await initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm"));
-            }
+            // Because we set `prerender = true`, Astro executes this script at BUILD time inside Node.js
+            // rather than at request time on Cloudflare's Edge. Node.js has no problem with fetching
+            // and instantiating WASM modules dynamically from a URL.
+            await initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm"));
         } catch (e) {
             console.error("WASM init error:", e);
         }
