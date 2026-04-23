@@ -10,7 +10,7 @@ export async function getStaticPaths() {
     }));
 }
 
-export async function GET({ props }) {
+export async function GET({ props }: { props: any }) {
     return new Response(JSON.stringify({ body: props.body }), {
         headers: {
             'Content-Type': 'application/json'
