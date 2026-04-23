@@ -2,6 +2,9 @@ import { getCollection } from "astro:content";
 import satori from "satori";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
 
+// Cloudflare Workers specific WASM import binding pattern
+import resvgWasm from "@resvg/resvg-wasm/index_bg.wasm?module";
+
 export const prerender = false;
 
 export const GET = async ({ request }: { request: Request }) => {
@@ -221,9 +224,15 @@ export const GET = async ({ request }: { request: Request }) => {
 
         // Initialize WASM
         try {
-            await initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm"));
+            // Check if Cloudflare gave us the compiled WebAssembly.Module directly via Vite/Wrangler
+            if (resvgWasm && resvgWasm instanceof WebAssembly.Module) {
+                await initWasm(resvgWasm);
+            } else {
+                // Fallback for local/node environments that allow runtime fetching
+                await initWasm(fetch("https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm"));
+            }
         } catch (e) {
-            // May already be initialized in dev mode
+            console.error("WASM init error:", e);
         }
 
 		const svg = await satori(html as any, {
