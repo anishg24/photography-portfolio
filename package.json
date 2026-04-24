@@ -9,6 +9,7 @@
     "deploy": "pnpm run build && npx wrangler pages deploy ./dist",
     "astro": "astro",
     "enrich": "node scripts/enrich.js",
+    "ai-enrich": "node scripts/enrich.js --ai",
     "rename": "node scripts/rename.js"
   },
   "dependencies": {

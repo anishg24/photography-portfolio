@@ -19,7 +19,7 @@ async function getEnrichmentData(base64Image, fileName, existingStory = "") {
     const systemPrompt = `You are an artistic photography assistant. 
 Look at the photograph and provide:
 1. A short, creative title (2-4 words, using spaces, no underscores).
-2. A short, single-paragraph editorial story setting the mood and describing the scene aesthetically. 
+2. A short, single-sentence editorial story setting the mood and describing the scene aesthetically. 
 
 Your response MUST be a JSON object:
 {
