@@ -15,7 +15,7 @@ export default function SiteIcon({ className = "w-10 h-10 md:w-12 md:h-12" }: { 
         className="w-full h-full"
       >
         {/* Background - Matched to Surface Container High for tactical depth */}
-        <rect width="24" height="24" rx="0" fill="var(--color-surface-container-high)" />
+        <rect width="24" height="24" rx="4" fill="var(--color-surface-container-high)" />
         
         {/* Outer Highlight Ring (The "Eyelid" blink effect) */}
         <motion.circle
@@ -67,22 +67,14 @@ export default function SiteIcon({ className = "w-10 h-10 md:w-12 md:h-12" }: { 
           }}
         />
 
-        {/* Tactical Status Light (Blinking) */}
-        <motion.rect
+        {/* Tactical Status Light */}
+        <rect
           x="18"
           y="4"
           width="2"
           height="2"
-          rx="0"
-          fill="#ff4d4d" // Red recording/status light
-          animate={{
-            opacity: [0, 1, 0]
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "linear"
-          }}
+          rx="1"
+          fill="var(--color-on-surface-variant)"
         />
       </svg>
     </motion.div>
