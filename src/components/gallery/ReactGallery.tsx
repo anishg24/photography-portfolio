@@ -107,7 +107,7 @@ export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGall
                                     </h2>
                                 </div>
                                 <div className="text-right hidden sm:block md:w-1/3 flex flex-col items-end pt-4 md:pt-0">
-                                    <p className="text-sm text-[var(--color-primary-container)] font-pixel uppercase tracking-[0.2em] mb-1 leading-none">
+                                    <p className="text-sm text-[var(--color-primary-container)] font-pixel font-bold uppercase tracking-[0.2em] mb-1 leading-none">
                                         [ ID: {folderId} ]
                                     </p>
                                     {timeStr && (

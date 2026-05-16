@@ -177,7 +177,7 @@ const PhotoCard = React.memo(({ photo, isFirstFolder, pIdx, setFocusedPhoto }: P
                                 <>
                                     <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-[#cffc00] opacity-70"></div>
                                     <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-[#cffc00] opacity-70"></div>
-                                    <div className="absolute top-4 right-4 text-[#cffc00] text-[8px] font-pixel tracking-widest uppercase">
+                                    <div className="absolute top-4 right-4 text-[#cffc00] text-[8px] font-pixel font-bold tracking-widest uppercase">
                                         [ AWAITING VISUAL DATA ]
                                     </div>
                                 </>
@@ -200,7 +200,7 @@ function DataTicker() {
         }, 75);
         return () => clearInterval(interval);
     }, []);
-    return <div className="text-[#cffc00] text-[10px] font-pixel tracking-widest mt-2 bg-[var(--color-surface)]/80 inline-block px-1">[{hex}]</div>
+    return <div className="text-[#cffc00] text-[10px] font-pixel font-bold tracking-widest mt-2 bg-[var(--color-surface)]/80 inline-block px-1">[{hex}]</div>
 }
 
 export default PhotoCard;
