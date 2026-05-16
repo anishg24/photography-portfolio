@@ -2,6 +2,7 @@
 export const prerender = true;
 import Layout from "../layouts/Layout.astro";
 import ReactGallery from "../components/gallery/ReactGallery";
+import SiteIcon from "../components/layout/SiteIcon";
 import { getCollection, render } from "astro:content";
 import { getImage } from "astro:assets";
 
@@ -113,7 +114,7 @@ const generateCollectionId = (folderName: string) => {
 			<div class="pt-12 pb-20 lg:pt-20 lg:pb-28 px-4 lg:px-12 w-full max-w-4xl mx-auto">
 				{/* Site Icon */}
 				<div class="flex justify-start mb-4">
-					<img src="/favicon.svg" alt="Site Icon" class="w-10 h-10 md:w-12 md:h-12" />
+					<SiteIcon client:load className="w-10 h-10 md:w-12 md:h-12" />
 				</div>
 
 				{/* Header */}
