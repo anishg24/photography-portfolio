@@ -108,8 +108,9 @@ const generateCollectionId = (folderName: string) => {
 	>
 		{/* Main Content */}
 		<main class="flex-1 w-full bg-[var(--color-surface)]">
-			{/* Hero Section */}
-			<div class="py-8 lg:py-12 px-4 lg:px-12 w-full max-w-4xl mx-auto">
+		{/* Hero Section */}
+		<section class="bg-[var(--color-surface-container-low)] w-full relative z-10">
+			<div class="pt-12 pb-20 lg:pt-20 lg:pb-28 px-4 lg:px-12 w-full max-w-4xl mx-auto">
 				{/* Site Icon */}
 				<div class="flex justify-start mb-4">
 					<img src="/favicon.svg" alt="Site Icon" class="w-10 h-10 md:w-12 md:h-12" />
@@ -132,11 +133,13 @@ const generateCollectionId = (folderName: string) => {
 					</div>
 				)}
 			</div>
+		</section>
 
-			{/* Divider */}
-			<div class="w-full h-px bg-white/5 mb-8 lg:mb-12"></div>
+		{/* Gradient Transition */}
+		<div class="w-full h-32 bg-gradient-to-b from-[var(--color-surface-container-low)] to-[var(--color-surface)] relative z-0"></div>
 
-			<div class="p-4 lg:p-12 w-full">
+		{/* Gallery Container with Negative Margin Overlap */}
+		<div class="p-4 lg:p-12 w-full relative z-20 -mt-24 lg:-mt-32">
 			{
 				Object.keys(groupedPhotos).length === 0 ? (
 					<div class="text-center py-20">
