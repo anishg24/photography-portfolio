@@ -2,7 +2,10 @@ import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AutoScrollButton from "./AutoScrollButton";
 import PhotoCard from "./PhotoCard";
+import AlbumAbout from "./AlbumAbout";
 import type { ReactGalleryProps, Photo } from "../../types/photo";
+import { recordView } from "../../hooks/useViewerStats";
+import { buildPhotoHashMap, resolveHash, slugify as toSlug } from "../../hooks/usePhotoHash";
 
 // Simple hash function to generate a stable, pseudo-unique 4-char hex string
 function generateFolderId(folderName: string): string {
@@ -24,15 +27,67 @@ const containerVariants = {
     }
 };
 
-export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGalleryProps) {
+export default function ReactGallery({ groupedPhotos, sortedFolders, albumHtml }: ReactGalleryProps) {
     const [focusedPhoto, setFocusedPhoto] = useState<Photo | null>(null);
 
-    // Close on escape
+    // Flat ordered list mirroring the display order for prev/next navigation
+    const allPhotos: Photo[] = sortedFolders.flatMap(folder => groupedPhotos[folder]);
+
+    // Stable photo -> hash map, built once
+    const photoHashMap = buildPhotoHashMap(groupedPhotos, sortedFolders);
+
+    // ── URL hash helpers ──────────────────────────────────────────────────────
+    const openPhoto = (photo: Photo, folder: string) => {
+        recordView(photo.id, folder);
+        setFocusedPhoto(photo);
+        const hash = photoHashMap.get(photo.id);
+        if (hash) history.replaceState(null, "", `#${hash}`);
+    };
+
+    const closePhoto = () => {
+        setFocusedPhoto(prev => {
+            if (prev) {
+                // Restore section hash so the user knows where they are
+                const folder = sortedFolders.find(f =>
+                    groupedPhotos[f].some(p => p.id === prev.id)
+                );
+                if (folder) history.replaceState(null, "", `#${toSlug(folder)}`);
+                else history.replaceState(null, "", window.location.pathname);
+            }
+            return null;
+        });
+    };
+
+    // ── On mount: resolve the initial hash ───────────────────────────────────
+    useEffect(() => {
+        const hash = window.location.hash.slice(1); // strip leading #
+        if (!hash) return;
+
+        // Try photo hash first (e.g. "tahoe-3")
+        const resolved = resolveHash(hash, groupedPhotos, sortedFolders);
+        if (resolved) {
+            // Small delay so the page has painted before opening FocusView
+            setTimeout(() => {
+                const sectionEl = document.getElementById(toSlug(resolved.folder));
+                sectionEl?.scrollIntoView({ behavior: "instant" });
+                openPhoto(resolved.photo, resolved.folder);
+            }, 100);
+            return;
+        }
+
+        // Fall back to section hash (e.g. "tahoe")
+        const sectionEl = document.getElementById(hash);
+        if (sectionEl) {
+            setTimeout(() => sectionEl.scrollIntoView({ behavior: "smooth" }), 100);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── Close on Escape ──────────────────────────────────────────────────────
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 (window as any).haptics?.trigger("light");
-                setFocusedPhoto(null);
+                closePhoto();
             }
         };
         window.addEventListener("keydown", handleKeyDown);
@@ -105,8 +160,11 @@ export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGall
                                     <h2 className="text-4xl lg:text-7xl font-serif text-[var(--color-on-surface)] font-bold tracking-tight uppercase leading-none">
                                         {folder}
                                     </h2>
+                                    {albumHtml && albumHtml[toSlug(folder)] && (
+                                        <AlbumAbout html={albumHtml[toSlug(folder)]} />
+                                    )}
                                 </div>
-                                <div className="text-right hidden sm:block md:w-1/3 flex flex-col items-end pt-4 md:pt-0">
+                                <div className="text-right hidden sm:flex md:w-1/3 flex-col items-end pt-4 md:pt-0">
                                     <p className="text-sm text-[var(--color-primary-container)] font-pixel font-bold uppercase tracking-[0.2em] mb-1 leading-none">
                                         [ ID: {folderId} ]
                                     </p>
@@ -126,7 +184,7 @@ export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGall
                                         photo={photo}
                                         isFirstFolder={isFirstFolder}
                                         pIdx={pIdx}
-                                        setFocusedPhoto={setFocusedPhoto}
+                                        setFocusedPhoto={(p) => openPhoto(p, folder)}
                                     />
                                 ))}
                             </div>
@@ -142,8 +200,28 @@ export default function ReactGallery({ groupedPhotos, sortedFolders }: ReactGall
                             photo={focusedPhoto}
                             onClose={() => {
                                 (window as any).haptics?.trigger("light");
-                                setFocusedPhoto(null);
+                                closePhoto();
                             }}
+                            onPrev={() => {
+                                const idx = allPhotos.findIndex(p => p.id === focusedPhoto.id);
+                                if (idx > 0) {
+                                    (window as any).haptics?.trigger("light");
+                                    const prev = allPhotos[idx - 1];
+                                    const folder = sortedFolders.find(f => groupedPhotos[f].some(p => p.id === prev.id)) ?? "";
+                                    openPhoto(prev, folder);
+                                }
+                            }}
+                            onNext={() => {
+                                const idx = allPhotos.findIndex(p => p.id === focusedPhoto.id);
+                                if (idx < allPhotos.length - 1) {
+                                    (window as any).haptics?.trigger("light");
+                                    const next = allPhotos[idx + 1];
+                                    const folder = sortedFolders.find(f => groupedPhotos[f].some(p => p.id === next.id)) ?? "";
+                                    openPhoto(next, folder);
+                                }
+                            }}
+                            hasPrev={allPhotos.findIndex(p => p.id === focusedPhoto.id) > 0}
+                            hasNext={allPhotos.findIndex(p => p.id === focusedPhoto.id) < allPhotos.length - 1}
                         />
                     </Suspense>
                 )}

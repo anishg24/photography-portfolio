@@ -22,4 +22,6 @@ export type Photo = {
 export type ReactGalleryProps = {
     groupedPhotos: Record<string, Photo[]>;
     sortedFolders: string[];
+    // Dictionary mapping folder name to raw markdown/HTML string (if we pass rendered HTML)
+    albumHtml?: Record<string, string>;
 }

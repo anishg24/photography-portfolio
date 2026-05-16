@@ -1,7 +1,11 @@
 ---
-title: About
+title: Anish Photography
 ---
 
-A curated visual archive capturing moments of light, shadow, and human presence. Each frame is a deliberate study in composition — a meditation on the transient beauty found in everyday scenes.
+I created this photography website because I wanted to have a creative outlet while sightseeing and to push me to go outside more often. I sought to analyze other aspects of our environment.
 
-This collection serves as both a personal catalog and an invitation to see the world through a different lens.
+My goal was to capture reality in a way that hasn't been captured before. Within this site, you will find a progression of how I tried to work on composition, editing, and exploring different styles and types of photography.
+
+I invite the viewer to enjoy this work and to see the world as I see it in my eyes, and through the lens of my camera.
+
+— [Anish](https://anish.govind.cc)

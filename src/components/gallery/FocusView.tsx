@@ -6,9 +6,13 @@ import WaitXIcon from "../icons/WaitXIcon";
 interface FocusViewProps {
     photo: Photo;
     onClose: () => void;
+    onPrev: () => void;
+    onNext: () => void;
+    hasPrev: boolean;
+    hasNext: boolean;
 }
 
-export default function FocusView({ photo, onClose }: FocusViewProps) {
+export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, hasNext }: FocusViewProps) {
     /** Tracks whether the full-res image has finished loading. */
     const [isFullResReady, setIsFullResReady] = useState(false);
     /** Ref to the single visible <img> element. */
@@ -16,6 +20,23 @@ export default function FocusView({ photo, onClose }: FocusViewProps) {
 
     const [bodyText, setBodyText] = useState<string | null>(photo.body || null);
     const [isLoadingBody, setIsLoadingBody] = useState(!photo.body);
+
+    // Reset body when photo changes
+    useEffect(() => {
+        setBodyText(photo.body || null);
+        setIsLoadingBody(!photo.body);
+        setIsFullResReady(false);
+    }, [photo.id]);
+
+    // Arrow key navigation
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === "ArrowLeft") onPrev();
+            if (e.key === "ArrowRight") onNext();
+        };
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [onPrev, onNext]);
 
     useEffect(() => {
         if (!bodyText && isLoadingBody) {
@@ -123,7 +144,7 @@ export default function FocusView({ photo, onClose }: FocusViewProps) {
                         transition={{ delay: 0.2 }}
                         className="flex-1 text-white lg:pl-12 flex flex-col justify-start lg:justify-center mt-10 lg:mt-0 relative overflow-visible"
                     >
-                        <div className="space-y-6" onClick={(e) => e.stopPropagation()}>
+                        <div className="space-y-6 flex flex-col h-full" onClick={(e) => e.stopPropagation()}>
                             <h2 className="text-4xl md:text-5xl font-serif">{photo.data.title || "Untitled"}</h2>
 
                             <div className="grid grid-cols-2 gap-4 text-xs font-mono tracking-widest text-neutral-400 border-l border-neutral-800 pl-4">
@@ -151,6 +172,24 @@ export default function FocusView({ photo, onClose }: FocusViewProps) {
                                         {bodyText}
                                     </motion.div>
                                 )}
+                            </div>
+                            {/* Prev / Next navigation */}
+                            <div className="flex items-center gap-6 pt-6 mt-auto">
+                                <button
+                                    onClick={onPrev}
+                                    disabled={!hasPrev}
+                                    className="text-[11px] font-mono tracking-widest text-[var(--color-on-surface)] opacity-30 hover:opacity-80 disabled:opacity-10 disabled:cursor-not-allowed transition-opacity flex items-center gap-2 cursor-pointer bg-transparent"
+                                >
+                                    ← prev
+                                </button>
+                                <span className="text-[var(--color-on-surface)] opacity-10 font-mono text-xs">/</span>
+                                <button
+                                    onClick={onNext}
+                                    disabled={!hasNext}
+                                    className="text-[11px] font-mono tracking-widest text-[var(--color-on-surface)] opacity-30 hover:opacity-80 disabled:opacity-10 disabled:cursor-not-allowed transition-opacity flex items-center gap-2 cursor-pointer bg-transparent"
+                                >
+                                    next →
+                                </button>
                             </div>
                         </div>
                     </motion.div>

@@ -22,7 +22,15 @@ const site = defineCollection({
     }),
 });
 
+const albums = defineCollection({
+    loader: glob({ pattern: "**/*.md", base: "./src/content/albums" }),
+    schema: z.object({
+        title: z.string().optional(),
+    }),
+});
+
 export const collections = {
     portfolio,
     site,
+    albums,
 };

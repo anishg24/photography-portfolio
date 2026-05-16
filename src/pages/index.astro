@@ -3,15 +3,32 @@ export const prerender = true;
 import Layout from "../layouts/Layout.astro";
 import ReactGallery from "../components/gallery/ReactGallery";
 import SiteIcon from "../components/layout/SiteIcon";
+import FooterStats from "../components/layout/FooterStats";
 import { getCollection, render } from "astro:content";
 import { getImage } from "astro:assets";
+
+import { marked } from "marked";
 
 // Fetch photos from local portfolio collection
 const photos = await getCollection("portfolio");
 
 // Fetch site about content
-const aboutEntry = await getCollection("site");
-const { Content: AboutContent } = aboutEntry.length > 0 ? await render(aboutEntry[0]) : { Content: null };
+const siteEntries = await getCollection("site");
+const aboutEntry = siteEntries.find(e => e.id === "about");
+const footerEntry = siteEntries.find(e => e.id === "footer");
+const { Content: AboutContent } = aboutEntry ? await render(aboutEntry) : { Content: null };
+const { Content: FooterContent } = footerEntry ? await render(footerEntry) : { Content: null };
+
+// Fetch album info
+const albumsInfo = await getCollection("albums");
+const renderedAlbumDocs: Record<string, string> = {};
+
+for (const album of albumsInfo) {
+    // Astro's glob loader slugifies IDs: "San Diego Safari.md" -> "san-diego-safari"
+    // We store by the slug so ReactGallery can look up by slugified folder name too
+    const slug = album.id.replace(/\.md$/, "");
+    renderedAlbumDocs[slug] = await marked.parse(album.body || "");
+}
 
 // Group photos by folder (album) instead of year
 const groupedPhotos: Record<string, typeof photos> = {};
@@ -119,7 +136,7 @@ const generateCollectionId = (folderName: string) => {
 
 				{/* Header */}
 				<h1 class="font-heading text-xl md:text-2xl text-white tracking-tight mb-3" style="font-weight: 450;">
-					{aboutEntry.length > 0 ? aboutEntry[0].data.title : 'Visual Archive'}
+					{aboutEntry ? aboutEntry.data.title : 'Visual Archive'}
 				</h1>
 
 				{/* Stats Sentence */}
@@ -153,10 +170,48 @@ const generateCollectionId = (folderName: string) => {
                         client:load 
                         groupedPhotos={optimizedGroupedPhotos} 
                         sortedFolders={sortedFolders} 
+                        albumHtml={renderedAlbumDocs}
                     />
 				)
 			}
 			</div>
+
+		{/* Footer */}
+		<footer class="bg-[var(--color-surface-container-low)] w-full relative z-10 mt-8">
+			{/* Gradient Transition into footer */}
+			<div class="w-full h-32 bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-surface-container-low)] relative z-0 -mb-1"></div>
+			<div class="pt-12 pb-20 lg:pt-16 lg:pb-28 px-4 lg:px-12 w-full max-w-4xl mx-auto">
+				{/* Session Stats */}
+				<FooterStats
+					client:load
+					totalPhotos={photos.length}
+					totalCollections={sortedFolders.length}
+				/>
+
+				{/* Footer text */}
+				{FooterContent && (
+					<div class="markdown-content text-sm md:text-base text-[var(--color-on-surface-variant)] leading-relaxed max-w-xl mt-6 mb-10">
+						<FooterContent />
+					</div>
+				)}
+
+				{/* Back to top */}
+				<button
+					id="back-to-top"
+					class="group flex items-center gap-3 cursor-pointer bg-transparent"
+				>
+					<span class="text-[11px] font-mono tracking-widest text-[var(--color-on-surface)] opacity-30 group-hover:opacity-70 transition-opacity">
+						↑ back to top
+					</span>
+				</button>
+
+				{/* Bottom rule */}
+				<p class="font-mono text-[10px] text-[var(--color-on-surface-variant)] opacity-20 mt-12">
+					© {new Date().getFullYear()} Anish Govind — All rights reserved
+				</p>
+			</div>
+		</footer>
+
 		</main>
 
 	</div>
@@ -164,6 +219,12 @@ const generateCollectionId = (folderName: string) => {
 	<script>
 		import { WebHaptics } from "web-haptics";
 		const haptics = new WebHaptics();
+
+		// Back to top
+		document.getElementById("back-to-top")?.addEventListener("click", () => {
+			(window as any).haptics?.trigger("light");
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		});
 
 
 		// Intersection Observer for Active State
@@ -188,6 +249,13 @@ const generateCollectionId = (folderName: string) => {
 						haptics.trigger("heavy");
 					}
 					activeSectionId = id;
+
+					// Update URL hash to reflect the current section,
+					// but only when FocusView is not open (it manages its own hash)
+					const isPhotoOpen = document.body.style.overflow === 'hidden';
+					if (!isPhotoOpen) {
+						history.replaceState(null, "", `#${id}`);
+					}
 
 					// Reset and activate all links pointing to this target (mobile + desktop)
 					navLinks.forEach((link) => {
