@@ -109,27 +109,32 @@ const generateCollectionId = (folderName: string) => {
 		{/* Main Content */}
 		<main class="flex-1 w-full bg-[var(--color-surface)]">
 			{/* Hero Section */}
-			<div class="py-16 lg:py-24 px-4 lg:px-12 w-full max-w-4xl mx-auto">
+			<div class="py-8 lg:py-12 px-4 lg:px-12 w-full max-w-4xl mx-auto">
 				{/* Site Icon */}
-				<div class="flex justify-center mb-8">
-					<img src="/favicon.svg" alt="Site Icon" class="w-16 h-16 md:w-20 md:h-20" />
+				<div class="flex justify-start mb-4">
+					<img src="/favicon.svg" alt="Site Icon" class="w-10 h-10 md:w-12 md:h-12" />
 				</div>
 
-				{/* Stats Line */}
-				<div class="text-center font-mono text-xs md:text-sm tracking-[0.15em] uppercase text-[var(--color-on-surface-variant)] mb-12">
-					<span class="text-[var(--color-primary-container)]">■</span> {sortedFolders.length} COLLECTIONS <span class="text-[var(--color-primary-container)]">■</span> {photos.length} EXPOSURES <span class="text-[var(--color-primary-container)]">■</span> LAST UPLOAD: {lastUploadDate}
-				</div>
+				{/* Header */}
+				<h1 class="font-[var(--font-display)] text-xl md:text-2xl font-[450] text-white tracking-tight mb-3">
+					Visual Archive
+				</h1>
+
+				{/* Stats Sentence */}
+				<p class="font-[var(--font-pixel)] text-[11px] md:text-xs text-[var(--color-on-surface-variant)] mb-6">
+					{sortedFolders.length} collections · {photos.length} exposures · last upload {lastUploadDate}
+				</p>
 
 				{/* Description */}
 				{AboutContent && (
-					<div class="max-w-2xl mx-auto text-center text-[var(--color-on-surface-variant)] leading-relaxed text-sm md:text-base [&_p]:mb-4 [&_p:last-child]:mb-0">
+					<div class="text-sm md:text-base text-[var(--color-on-surface-variant)] leading-relaxed max-w-xl [&_p]:mb-3 [&_p:last-child]:mb-0">
 						<AboutContent />
 					</div>
 				)}
 			</div>
 
 			{/* Divider */}
-			<div class="w-full h-px bg-white/5 mb-16 lg:mb-24"></div>
+			<div class="w-full h-px bg-white/5 mb-8 lg:mb-12"></div>
 
 			<div class="p-4 lg:p-12 w-full">
 			{
