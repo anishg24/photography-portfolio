@@ -97,7 +97,10 @@ const generateCollectionId = (folderName: string) => {
 		{/* Main Content */}
 		<main class="flex-1 w-full bg-[var(--color-surface)]">
 			<div class="py-8 text-center bg-[var(--color-surface)] sticky top-0 z-10 w-full border-b border-white/5">
-				<h1 class="text-3xl md:text-5xl font-serif text-white tracking-widest uppercase">Anish Photography</h1>
+				<h1 class="text-3xl md:text-5xl font-serif font-[450] text-white tracking-[0.15em] uppercase">Anish Photography</h1>
+				<div class="mt-4 font-mono text-[10px] md:text-xs tracking-[0.2em] uppercase text-[var(--color-on-surface-variant)]">
+					<span class="text-[var(--color-primary-container)]">■</span> LENS ACTIVE <span class="text-[var(--color-primary-container)]">■</span> {sortedFolders.length} COLLECTIONS <span class="text-[var(--color-primary-container)]">■</span> {photos.length} EXPOSURES
+				</div>
 			</div>
 			<div class="p-4 lg:p-12 w-full">
 			{
