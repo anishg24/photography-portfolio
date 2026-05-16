@@ -114,7 +114,7 @@ const PhotoCard = React.memo(({ photo, isFirstFolder, pIdx, setFocusedPhoto }: P
                         clipPath: phase === "done" ? "none" : imgClipPath,
                         opacity: phase === "loading" ? 0 : 1, // Only visible during revealing and done
                     }}
-                    className="relative z-10"
+                    className="relative z-10 bg-[var(--color-surface)]"
                 >
                     <motion.img
                         ref={imgRef}
@@ -140,13 +140,13 @@ const PhotoCard = React.memo(({ photo, isFirstFolder, pIdx, setFocusedPhoto }: P
                         <motion.div 
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="absolute inset-0 z-20 pointer-events-none"
+                            className="absolute inset-0 z-20 pointer-events-none bg-[var(--color-surface)]"
                         >
                             <div className="absolute inset-0 border border-white/5 pointer-events-none"></div>
 
-                            {/* Option 5: SVG Noise */}
+                            {/* SVG Noise */}
                             {phase === "loading" && (
-                                <svg className="absolute inset-0 w-full h-full opacity-20 mix-blend-overlay pointer-events-none">
+                                <svg className="absolute inset-0 w-full h-full opacity-20 mix-blend-overlay pointer-events-none bg-[var(--color-surface)]">
                                     <filter id={filterId}>
                                         <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
                                     </filter>
@@ -162,7 +162,7 @@ const PhotoCard = React.memo(({ photo, isFirstFolder, pIdx, setFocusedPhoto }: P
 
                             {/* Ticker and EXIF */}
                             {phase === "loading" && (
-                                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-start z-10" style={{ background: 'linear-gradient(to top, rgba(14,14,14,0.95), transparent)' }}>
+                                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-start z-10" style={{ background: 'linear-gradient(to top, var(--color-surface), transparent)' }}>
                                     {photo.data.iso && <div className="text-[#adaaaa] text-[9px] font-mono uppercase tracking-[0.1em] mb-1">ISO {photo.data.iso}</div>}
                                     {photo.data.aperture && <div className="text-[#adaaaa] text-[9px] font-mono uppercase tracking-[0.1em] mb-1">F/{photo.data.aperture.replace('f/', '')}</div>}
                                     {photo.data.shutter && <div className="text-[#adaaaa] text-[9px] font-mono uppercase tracking-[0.1em] mb-1">{photo.data.shutter}S</div>}
