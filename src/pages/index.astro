@@ -117,17 +117,17 @@ const generateCollectionId = (folderName: string) => {
 
 				{/* Header */}
 				<h1 class="font-heading text-xl md:text-2xl text-white tracking-tight mb-3" style="font-weight: 450;">
-					Visual Archive
+					{aboutEntry.length > 0 ? aboutEntry[0].data.title : 'Visual Archive'}
 				</h1>
 
 				{/* Stats Sentence */}
-				<p class="font-pixel text-[11px] md:text-xs text-[var(--color-on-surface-variant)] mb-6">
-					{sortedFolders.length} collections · {photos.length} exposures · last upload {lastUploadDate}
+				<p class="font-mono text-[11px] md:text-xs text-[var(--color-on-surface-variant)] mb-6">
+					{photos.length} exposures across {sortedFolders.length} collections, last updated {lastUploadDate}.
 				</p>
 
 				{/* Description */}
 				{AboutContent && (
-					<div class="text-sm md:text-base text-[var(--color-on-surface-variant)] leading-relaxed max-w-xl [&_p]:mb-3 [&_p:last-child]:mb-0">
+					<div class="markdown-content text-sm md:text-base text-[var(--color-on-surface-variant)] leading-relaxed max-w-xl">
 						<AboutContent />
 					</div>
 				)}
