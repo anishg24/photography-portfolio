@@ -15,6 +15,14 @@ const portfolio = defineCollection({
     }),
 });
 
+const site = defineCollection({
+    loader: glob({ pattern: "**/*.md", base: "./src/content/site" }),
+    schema: z.object({
+        title: z.string(),
+    }),
+});
+
 export const collections = {
     portfolio,
+    site,
 };

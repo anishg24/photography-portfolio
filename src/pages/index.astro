@@ -2,11 +2,15 @@
 export const prerender = true;
 import Layout from "../layouts/Layout.astro";
 import ReactGallery from "../components/gallery/ReactGallery";
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import { getImage } from "astro:assets";
 
 // Fetch photos from local portfolio collection
 const photos = await getCollection("portfolio");
+
+// Fetch site about content
+const aboutEntry = await getCollection("site");
+const { Content: AboutContent } = aboutEntry.length > 0 ? await render(aboutEntry[0]) : { Content: null };
 
 // Group photos by folder (album) instead of year
 const groupedPhotos: Record<string, typeof photos> = {};
@@ -46,6 +50,14 @@ sortedFolders.forEach((folder) => {
         }
 	);
 });
+
+// Calculate last upload date from all photos
+const allDates = photos
+	.map(p => p.data.date ? new Date(p.data.date).getTime() : 0)
+	.filter(d => d > 0);
+const lastUploadDate = allDates.length > 0 
+	? new Date(Math.max(...allDates)).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+	: 'Unknown';
 
 // Pre-optimize images for ReactGallery to work correctly on Cloudflare Pages
 const optimizedGroupedPhotos: Record<string, any[]> = {};
@@ -96,12 +108,29 @@ const generateCollectionId = (folderName: string) => {
 	>
 		{/* Main Content */}
 		<main class="flex-1 w-full bg-[var(--color-surface)]">
-			<div class="py-8 text-center bg-[var(--color-surface)] sticky top-0 z-10 w-full border-b border-white/5">
-				<h1 class="text-3xl md:text-5xl font-serif font-[450] text-white tracking-[0.15em] uppercase">Anish Photography</h1>
-				<div class="mt-4 font-mono text-[10px] md:text-xs tracking-[0.2em] uppercase text-[var(--color-on-surface-variant)]">
-					<span class="text-[var(--color-primary-container)]">■</span> LENS ACTIVE <span class="text-[var(--color-primary-container)]">■</span> {sortedFolders.length} COLLECTIONS <span class="text-[var(--color-primary-container)]">■</span> {photos.length} EXPOSURES
+			{/* Hero Section */}
+			<div class="py-16 lg:py-24 px-4 lg:px-12 w-full max-w-4xl mx-auto">
+				{/* Site Icon */}
+				<div class="flex justify-center mb-8">
+					<img src="/favicon.svg" alt="Site Icon" class="w-16 h-16 md:w-20 md:h-20" />
 				</div>
+
+				{/* Stats Line */}
+				<div class="text-center font-mono text-xs md:text-sm tracking-[0.15em] uppercase text-[var(--color-on-surface-variant)] mb-12">
+					<span class="text-[var(--color-primary-container)]">■</span> {sortedFolders.length} COLLECTIONS <span class="text-[var(--color-primary-container)]">■</span> {photos.length} EXPOSURES <span class="text-[var(--color-primary-container)]">■</span> LAST UPLOAD: {lastUploadDate}
+				</div>
+
+				{/* Description */}
+				{AboutContent && (
+					<div class="max-w-2xl mx-auto text-center text-[var(--color-on-surface-variant)] leading-relaxed text-sm md:text-base [&_p]:mb-4 [&_p:last-child]:mb-0">
+						<AboutContent />
+					</div>
+				)}
 			</div>
+
+			{/* Divider */}
+			<div class="w-full h-px bg-white/5 mb-16 lg:mb-24"></div>
+
 			<div class="p-4 lg:p-12 w-full">
 			{
 				Object.keys(groupedPhotos).length === 0 ? (
