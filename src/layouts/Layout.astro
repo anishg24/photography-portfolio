@@ -79,6 +79,7 @@ const siteName = "Anish Photography";
       // Initialize Web Haptics (Must showSwitch to bypass iOS display:none limitations)
       const haptics = new WebHaptics({ showSwitch: true });
       (window as any).haptics = haptics;
+      (window as any).lenis = lenis;
 
       // ─── Album Boundary Detent ────────────────────────────────────────────────
       // Collect section top offsets once layout is stable.

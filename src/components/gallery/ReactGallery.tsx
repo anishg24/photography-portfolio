@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import AutoScrollButton from "./AutoScrollButton";
 import PhotoCard from "./PhotoCard";
 import AlbumAbout from "./AlbumAbout";
+import AlbumScrubber from "./AlbumScrubber";
 import type { ReactGalleryProps, Photo } from "../../types/photo";
 import { recordView } from "../../hooks/useViewerStats";
 import { buildPhotoHashMap, resolveHash, slugify as toSlug } from "../../hooks/usePhotoHash";
@@ -107,9 +107,7 @@ export default function ReactGallery({ groupedPhotos, sortedFolders, albumHtml }
 
     return (
         <div className="relative">
-            <div className="hidden md:block">
-                <AutoScrollButton />
-            </div>
+            <AlbumScrubber sortedFolders={sortedFolders} />
             
             {/* The Main Gallery Grid */}
             <div className="space-y-40 pb-32 lg:pb-0">

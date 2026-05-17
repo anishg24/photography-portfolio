@@ -65,25 +65,27 @@ body {
 
 /* Scrollbar styling for the new look */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 0px;
+    background: transparent;
 }
 
-::-webkit-scrollbar-track {
-    background: var(--color-surface-container-lowest);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--color-surface-container-highest);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-primary-container);
+body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 /* Utility for sharp edges */
 .sharp {
     border-radius: 0 !important;
+}
+
+/* Hide scrollbar while preserving scroll functionality */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }
 
 /* Glassmorphism utility */
