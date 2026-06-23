@@ -234,8 +234,8 @@ export const GET = async () => {
                                     props: {
                                         style: {
                                             fontSize: "72px",
-                                            fontWeight: 800,
-                                            fontFamily: '"Playfair Display"',
+                                            fontWeight: 400,
+                                            fontFamily: '"Instrument Serif"',
                                             color: colorOnSurface,
                                             marginBottom: "16px",
                                             letterSpacing: "-0.02em",
@@ -249,7 +249,7 @@ export const GET = async () => {
                                         style: {
                                             fontSize: "32px",
                                             fontWeight: 400,
-                                            fontFamily: '"JetBrains Mono"',
+                                            fontFamily: '"Nanum Gothic Coding"',
                                             color: colorPrimaryContainer,
                                             letterSpacing: "0.1em",
                                         },
@@ -264,16 +264,16 @@ export const GET = async () => {
         };
 
         // Load fonts
-        const [fontPlayfairRes, fontJetBrainsRes] = await Promise.all([
+        const [fontInstrumentRes, fontNanumRes] = await Promise.all([
             fetch(
-                "https://cdn.jsdelivr.net/fontsource/fonts/playfair-display@latest/latin-800-normal.ttf",
+                "https://cdn.jsdelivr.net/fontsource/fonts/instrument-serif@latest/latin-400-normal.ttf",
             ),
             fetch(
-                "https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.ttf",
+                "https://cdn.jsdelivr.net/fontsource/fonts/nanum-gothic-coding@latest/latin-400-normal.ttf",
             ),
         ]);
-        const fontPlayfair = await fontPlayfairRes.arrayBuffer();
-        const fontJetBrains = await fontJetBrainsRes.arrayBuffer();
+        const fontInstrument = await fontInstrumentRes.arrayBuffer();
+        const fontNanum = await fontNanumRes.arrayBuffer();
 
         // Initialize resvg WASM
         try {
@@ -289,14 +289,14 @@ export const GET = async () => {
             height: 630,
             fonts: [
                 {
-                    name: "Playfair Display",
-                    data: fontPlayfair,
-                    weight: 800,
+                    name: "Instrument Serif",
+                    data: fontInstrument,
+                    weight: 400,
                     style: "normal",
                 },
                 {
-                    name: "JetBrains Mono",
-                    data: fontJetBrains,
+                    name: "Nanum Gothic Coding",
+                    data: fontNanum,
                     weight: 400,
                     style: "normal",
                 },

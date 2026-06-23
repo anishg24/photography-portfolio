@@ -253,7 +253,8 @@ const generateCollectionId = (folderName: string) => {
 					// Update URL hash to reflect the current section,
 					// but only when FocusView is not open (it manages its own hash)
 					const isPhotoOpen = document.body.style.overflow === 'hidden';
-					if (!isPhotoOpen) {
+					const hasPhotoHash = /#.+-\d+$/.test(window.location.hash);
+					if (!isPhotoOpen && !hasPhotoHash) {
 						history.replaceState(null, "", `#${id}`);
 					}
 

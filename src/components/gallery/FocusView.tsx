@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import type { Photo } from "../../types/photo";
 import WaitXIcon from "../icons/WaitXIcon";
+import { marked } from "marked";
 
 interface FocusViewProps {
     photo: Photo;
@@ -18,13 +19,13 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
     /** Ref to the single visible <img> element. */
     const imgRef = useRef<HTMLImageElement>(null);
 
-    const [bodyText, setBodyText] = useState<string | null>(photo.body || null);
-    const [isLoadingBody, setIsLoadingBody] = useState(!photo.body);
+    const [bodyHtml, setBodyHtml] = useState<string>("");
+    const [isLoadingBody, setIsLoadingBody] = useState(true);
 
     // Reset body when photo changes
     useEffect(() => {
-        setBodyText(photo.body || null);
-        setIsLoadingBody(!photo.body);
+        setBodyHtml("");
+        setIsLoadingBody(true);
         setIsFullResReady(false);
     }, [photo.id]);
 
@@ -39,11 +40,12 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
     }, [onPrev, onNext]);
 
     useEffect(() => {
-        if (!bodyText && isLoadingBody) {
+        if (!bodyHtml && isLoadingBody) {
             fetch(`/api/photo/${photo.id}.json`)
                 .then(res => res.json())
-                .then(data => {
-                    setBodyText(data.body);
+                .then(async data => {
+                    const html = await marked.parse(data.body || "");
+                    setBodyHtml(html);
                     setIsLoadingBody(false);
                 })
                 .catch(err => {
@@ -51,7 +53,7 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
                     setIsLoadingBody(false);
                 });
         }
-    }, [photo.id, bodyText, isLoadingBody]);
+    }, [photo.id, bodyHtml, isLoadingBody]);
 
     const thumbnailSrc = photo.thumbnailUrl || photo.data.image.src;
     const fullSrc = photo.fullUrl || photo.data.image.src;
@@ -113,7 +115,9 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
 
                     {/* The Image scaling out of the grid */}
                     <motion.div
-                        layoutId={`photo-${photo.id}`}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
                         className="relative z-50 flex-shrink-0 w-full lg:w-[60%] flex items-center justify-center lg:items-start lg:p-4"
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     >
@@ -127,7 +131,7 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
                             ref={imgRef}
                             src={thumbnailSrc}
                             alt={photo.data.title}
-                            className="max-h-[70vh] lg:max-h-[85vh] max-w-full object-contain shadow-2xl rounded-sm"
+                            className="max-h-[70vh] lg:max-h-[85vh] max-w-full object-contain shadow-2xl"
                             style={{
                                 filter: isFullResReady ? 'blur(0px)' : 'blur(6px)',
                                 transition: 'filter 0.6s ease-out',
@@ -158,19 +162,19 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
                             <div className="text-sm leading-relaxed text-neutral-300 font-sans mt-8 max-w-md relative z-10 min-h-[100px]">
                                 {isLoadingBody ? (
                                     <div className="animate-pulse flex flex-col gap-2 opacity-50">
-                                        <div className="h-3 bg-neutral-700/50 rounded w-3/4"></div>
-                                        <div className="h-3 bg-neutral-700/50 rounded w-full"></div>
-                                        <div className="h-3 bg-neutral-700/50 rounded w-5/6"></div>
-                                        <div className="h-3 bg-neutral-700/50 rounded w-4/5"></div>
+                                        <div className="h-3 bg-neutral-700/50 w-3/4"></div>
+                                        <div className="h-3 bg-neutral-700/50 w-full"></div>
+                                        <div className="h-3 bg-neutral-700/50 w-5/6"></div>
+                                        <div className="h-3 bg-neutral-700/50 w-4/5"></div>
                                     </div>
                                 ) : (
                                     <motion.div 
                                         initial={{ opacity: 0 }} 
                                         animate={{ opacity: 1 }} 
                                         transition={{ duration: 0.5 }}
-                                    >
-                                        {bodyText}
-                                    </motion.div>
+                                        className="markdown-content"
+                                        dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                                    />
                                 )}
                             </div>
                             {/* Prev / Next navigation */}
@@ -180,7 +184,7 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
                                     disabled={!hasPrev}
                                     className="text-[11px] font-mono tracking-widest text-[var(--color-on-surface)] opacity-30 hover:opacity-80 disabled:opacity-10 disabled:cursor-not-allowed transition-opacity flex items-center gap-2 cursor-pointer bg-transparent"
                                 >
-                                    ← prev
+                                    ← newer
                                 </button>
                                 <span className="text-[var(--color-on-surface)] opacity-10 font-mono text-xs">/</span>
                                 <button
@@ -188,7 +192,7 @@ export default function FocusView({ photo, onClose, onPrev, onNext, hasPrev, has
                                     disabled={!hasNext}
                                     className="text-[11px] font-mono tracking-widest text-[var(--color-on-surface)] opacity-30 hover:opacity-80 disabled:opacity-10 disabled:cursor-not-allowed transition-opacity flex items-center gap-2 cursor-pointer bg-transparent"
                                 >
-                                    next →
+                                    older →
                                 </button>
                             </div>
                         </div>

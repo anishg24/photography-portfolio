@@ -106,6 +106,7 @@ const PhotoCard = React.memo(({ photo, isFirstFolder, pIdx, setFocusedPhoto }: P
             <motion.div
                 layoutId={`photo-${photo.id}`}
                 className="relative bg-[var(--color-surface)] overflow-hidden"
+                style={{ aspectRatio: `${photo.data.image.width} / ${photo.data.image.height}` }}
                 whileHover={{ scale: 1.0 }}
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >

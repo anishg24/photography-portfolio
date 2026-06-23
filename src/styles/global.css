@@ -1,27 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-    /* Fonts */
-    --font-sans: "Manrope", sans-serif;
-    --font-serif: "Playfair Display", serif;
-    --font-mono: "JetBrains Mono", monospace;
-    --font-heading: "Fraunces", serif;
-    --font-pixel: "Doto", monospace;
+    /* Fonts - Mapped to Resume Portfolio Design System */
+    --font-sans: "IBM Plex Sans", sans-serif;
+    --font-serif: "Instrument Serif", serif;
+    --font-mono: "Nanum Gothic Coding", monospace;
+    --font-heading: "Instrument Serif", serif;
+    --font-pixel: "Nanum Gothic Coding", monospace;
 
-    /* Colors - The Kinetic Engineer Palette */
+    /* Brand Tokens (from ResumePortfolio/DESIGN.md) */
+    --color-bg-primary: #131313;
+    --color-bg-secondary: #0e0e0e;
+    --color-accent-lime: #CFFC00;
+    --color-accent-lime-glow: rgba(207, 252, 0, 0.25);
+    --color-accent-lime-light: #e3ff66;
+    --color-accent-coral: #c6c6c7;
+    --color-accent-coral-glow: rgba(198, 198, 199, 0.15);
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #e5e2e1;
+    --color-text-muted: #ADAAAA;
+    --color-glass-bg: #1c1b1b;
+    --color-glass-border: rgba(255, 255, 255, 0.08);
+    --color-glass-border-hover: rgba(255, 255, 255, 0.18);
+
+    /* Functional Mappings (for PhotoPortfolio components compatibility) */
+    --color-surface: var(--color-bg-primary); /* #131313 main canvas background */
+    --color-surface-container-low: var(--color-bg-secondary); /* #0e0e0e container background */
     --color-surface-container-lowest: #000000;
-    --color-surface-container-low: #131313;
-    --color-surface-container-high: #201f1f;
-    --color-surface-container-highest: #262626;
-    --color-surface: #0e0e0e;
-    --color-primary: #f4ffc8;
-    --color-primary-container: #cffc00;
-    --color-on-surface: #ffffff;
-    --color-on-surface-variant: #adaaaa;
-    --color-outline: #767575;
-    --color-outline-variant: #484847;
+    --color-surface-container-high: var(--color-glass-bg); /* #1c1b1b card/panel background */
+    --color-surface-container-highest: #262626; /* keeping high-contrast dark secondary */
+    
+    --color-primary: var(--color-accent-lime-light); /* #e3ff66 for links and subtitle elements */
+    --color-primary-container: var(--color-accent-lime); /* #cffc00 signature hyper-lime accent */
+    --color-on-surface: var(--color-text-primary); /* #ffffff */
+    --color-on-surface-variant: var(--color-text-secondary); /* #e5e2e1 body copy */
+    --color-outline: var(--color-text-muted); /* #ADAAAA for details and metadata */
+    --color-outline-variant: var(--color-glass-border); /* 1px borders */
 
-    /* Old mappings to avoid breaking everything before component updates */
+    /* Legacy compatibility bindings */
     --color-obsidian: var(--color-surface);
     --color-matte: var(--color-surface-container-low);
     --color-structural: var(--color-surface-container-high);
@@ -61,6 +77,8 @@ body {
     background-color: var(--color-surface);
     color: var(--color-on-surface-variant);
     font-family: var(--font-sans);
+    font-size: 1.05rem;
+    line-height: 1.65;
 }
 
 /* Scrollbar styling for the new look */
@@ -226,7 +244,7 @@ label[for^="web-haptics-"] {
     padding: 0;
 }
 .markdown-content blockquote {
-    border-left: 2px solid var(--color-outline-variant);
+    border-left: 4px solid rgba(255, 255, 255, 0.16);
     padding-left: 1rem;
     color: var(--color-outline);
     margin-bottom: 0.75rem;
@@ -237,3 +255,39 @@ label[for^="web-haptics-"] {
     background: var(--color-outline-variant);
     margin: 1.5rem 0;
 }
+
+/* Specific Design Tokens from ResumePortfolio/DESIGN.md */
+.hero-title-primary {
+    font-family: var(--font-serif);
+    font-size: clamp(5rem, 9vw, 8.5rem);
+    font-weight: 900;
+    line-height: 0.95;
+}
+
+.hero-title-secondary {
+    font-family: var(--font-sans);
+    font-size: clamp(1.15rem, 2.5vw, 1.85rem);
+    font-weight: 300;
+    letter-spacing: 0.32em;
+}
+
+.section-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 800;
+    font-style: italic;
+}
+
+.body-text {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+.telemetry-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+

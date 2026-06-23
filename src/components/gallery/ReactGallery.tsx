@@ -140,7 +140,6 @@ export default function ReactGallery({ groupedPhotos, sortedFolders, albumHtml }
                             key={folder}
                             id={sectionId}
                             className="scroll-mt-32 lg:scroll-mt-24 section-folder relative"
-                            style={{ contentVisibility: 'auto', containIntrinsicSize: '0 800px' }}
                             initial="hidden"
                             whileInView="show"
                             viewport={{ once: true, margin: "-100px" }}
